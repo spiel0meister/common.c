@@ -4,6 +4,7 @@
 #define da_append(da, item) \
     if ((da)->size == (da)->capacity) { \
         (da)->capacity = (da)->capacity == 0 ? 2 : (da)->capacity * 2; \
+        (da)->items = realloc((da)->items, sizeof((da)->items[0]) * (da)->capacity); \
     } \
     (da)->items[(da)->size++] = (item)
 
