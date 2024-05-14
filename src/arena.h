@@ -13,7 +13,6 @@ typedef struct {
 #define arena_calloc(arena, type) (type*)arena_calloc_s(arena, sizeof(type))
 #define arena_calloc_array(arena, type, n) (type*)arena_calloc_s(arena, sizeof(type) * (n))
 
-#define arena_dump_from_ptr(arena, sink, type, ptr) arena_dump(arena, sink, (ptr) - (arena)->mem, sizeof(type))
 #define arena_dump_all(arena, sink) arena_dump(arena, sink, 0, (arena)->size)
 
 void arena_prealloc(Arena* arena, size_t capacity);

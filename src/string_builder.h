@@ -18,7 +18,7 @@ typedef struct {
     while ((sbuilder)->size + strlen(cstr) >= (sbuilder)->capacity) { \
         (sbuilder)->capacity = (sbuilder)->capacity == 0 ? 2 : (sbuilder)->capacity * 2; \
     } \
-    memcpy((sbuilder)->items + (sbuilder)->size, strlen(cstr)); \
+    memcpy((sbuilder)->items + (sbuilder)->size, cstr, strlen(cstr)); \
     (sbuilder)->size += strlen(cstr)
 
 #define sbuilder_cstr_append_many(sbuilder, first, ...) do {\
