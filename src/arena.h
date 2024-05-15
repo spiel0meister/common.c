@@ -20,11 +20,10 @@ void arena_prealloc(Arena* arena, size_t capacity);
 void* arena_alloc_s(Arena* arena, size_t size);
 void* arena_calloc_s(Arena* arena, size_t size);
 
+int arena_alloced(Arena* arena);
 void arena_dump(Arena* arena, FILE* sink, size_t i, size_t n);
 void arena_reset(Arena* arena);
 void arena_free(Arena* arena);
-
-#endif // ARENA_H
 
 #ifdef ARENA_IMPLEMENTATION
 #include <stdlib.h>
@@ -35,12 +34,6 @@ void arena_prealloc(Arena* arena, size_t capacity) {
     arena->capacity = capacity;
 }
 
-void* arena_calloc_s(Arena* arena, size_t size) {
-    void* p = arena_alloc_s(arena, size);
-    memset(p, 0, size);
-    return p;
-}
-
 void* arena_alloc_s(Arena* arena, size_t size) {
     if (arena->size + size > arena->capacity) {
         return NULL;
@@ -48,6 +41,16 @@ void* arena_alloc_s(Arena* arena, size_t size) {
     size_t i = arena->size;
     arena->size += size;
     return arena->mem + i;
+}
+
+void* arena_calloc_s(Arena* arena, size_t size) {
+    void* p = arena_alloc_s(arena, size);
+    memset(p, 0, size);
+    return p;
+}
+
+int arena_alloced(Arena* arena) {
+    return arena->mem != NULL;
 }
 
 void arena_dump(Arena* arena, FILE* sink, size_t i, size_t n) {
@@ -73,3 +76,6 @@ void arena_free(Arena* arena) {
     arena->capacity = 0;
 }
 #endif // ARENA_IMPLEMENTATION
+
+#endif // ARENA_H
+
