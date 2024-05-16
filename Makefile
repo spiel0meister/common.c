@@ -1,2 +1,4 @@
+CC=gcc -std=c11
+
 test: src/main.c
-	gcc main.c -o test
+	$(CC) -ggdb $^ -o $@

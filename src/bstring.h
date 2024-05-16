@@ -19,6 +19,8 @@ int string_cmp(String str1, String str2);
 int string_empty(String str1);
 
 #ifdef BSTRING_IMPLEMENTATION
+#include <string.h>
+#include <assert.h>
 String string_from_cstr(char* cstr) {
     return (String) {
         cstr,
@@ -28,6 +30,7 @@ String string_from_cstr(char* cstr) {
 
 char* string_to_cstr(String string) {
     char* cstr = STRING_MALLOC(string.len + 1);
+    assert(cstr != NULL);
     memcpy(cstr, string.str, string.len);
     cstr[string.len] = 0;
     return cstr;

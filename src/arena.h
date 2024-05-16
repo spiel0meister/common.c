@@ -27,6 +27,7 @@ void arena_free(Arena* arena);
 
 #ifdef ARENA_IMPLEMENTATION
 #include <stdlib.h>
+#include <string.h>
 
 void arena_prealloc(Arena* arena, size_t capacity) {
     arena->mem = malloc(capacity);
