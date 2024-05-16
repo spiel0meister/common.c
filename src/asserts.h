@@ -12,4 +12,9 @@
 #define assert_eq(lhs, rhs) assert(lhs == rhs)
 #define assert_neq(lhs, rhs) assert(lhs != rhs)
 
+#define dbg(expr, fmt) \
+    printf("%s = ", #expr); \
+    printf(fmt, expr); \
+    printf("\n")
+
 #endif // ASSERTS_H
