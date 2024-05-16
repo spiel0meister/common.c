@@ -21,6 +21,7 @@ int string_empty(String str1);
 #ifdef BSTRING_IMPLEMENTATION
 #include <string.h>
 #include <assert.h>
+#include <stdlib.h>
 String string_from_cstr(char* cstr) {
     return (String) {
         cstr,
