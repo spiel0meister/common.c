@@ -11,7 +11,7 @@
 
 #define da_remove(da, i, n) \
     assert((i) + (n) <= (da)->size); \
-    memmove((da)->items + (i), (da)->items + (i) + 1, n * sizeof((da)->items[0]))
+    memmove((da)->items + (i), (da)->items + (i) + 1, (n) * sizeof((da)->items[0]))
 
 
 #define da_foreach(da, type, ptr) for (type* ptr = (da)->items; ptr != (da)->items + (da)->size; ptr++)
