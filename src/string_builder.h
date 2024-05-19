@@ -28,7 +28,7 @@ void sbuilder_push_str_(StringBuilder* sbuilder, ...);
 
 char* sbuilder_export(StringBuilder const* sbuilder);
 
-ShortString shortf(char const* fmt, ...);
+__attribute__ ((format (printf, 1, 2))) ShortString shortf(char const* fmt, ...);
 
 #ifdef SBUILDER_IMPLEMENETATION
 #include <assert.h>
@@ -36,7 +36,7 @@ ShortString shortf(char const* fmt, ...);
 #include <stdlib.h>
 #include <string.h>
 
-ShortString shortf(char const* fmt, ...) {
+__attribute__ ((format (printf, 1, 2))) ShortString shortf(char const* fmt, ...) {
     char buf[TEXTBUF_LEN] = {0};
     size_t size = 0;
 
