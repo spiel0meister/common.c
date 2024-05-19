@@ -30,13 +30,13 @@ char* sbuilder_export(StringBuilder const* sbuilder);
 
 __attribute__ ((format (printf, 1, 2))) ShortString shortf(char const* fmt, ...);
 
-#ifdef SBUILDER_IMPLEMENETATION
+#ifdef SBUILDER_IMPLEMENTATION
 #include <assert.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 
-__attribute__ ((format (printf, 1, 2))) ShortString shortf(char const* fmt, ...) {
+ShortString shortf(char const* fmt, ...) {
     char buf[TEXTBUF_LEN] = {0};
     size_t size = 0;
 
