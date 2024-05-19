@@ -26,7 +26,7 @@ void sbuilder_push_str_(StringBuilder* sbuilder, ...);
     #define SBUILDER_MALLOC(n) malloc(sizeof(char) * (n))
 #endif // SBUILDER_MALLOC
 
-ShortString sbuilder_export(StringBuilder const* sbuilder);
+char* sbuilder_export(StringBuilder const* sbuilder);
 
 ShortString shortf(char const* fmt, ...);
 
@@ -92,11 +92,11 @@ void sbuilder_push_str_(StringBuilder* sbuilder, ...) {
     va_end(list);
 }
 
-ShortString sbuilder_export(StringBuilder const* sbuilder) {
-    ShortString out = {0};
-    memcpy(out.buf, sbuilder->items, sbuilder->size);
-    out.buf[sbuilder->size] = 0;
-    return out;
+char* sbuilder_export(StringBuilder const* sbuilder) {
+    char* heap_mem = SBUILDER_MALLOC(sbuilder->size + 1);
+    memcpy(heap_mem, sbuilder->items, sbuilder->size);
+    heap_mem[sbuilder->size] = 0;
+    return heap_mem;
 }
 
 #endif // STRING_BUILDER_IMPLENTATION
