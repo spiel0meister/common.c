@@ -8,10 +8,12 @@ typedef struct {
     int capacity;
 }StringBuilder;
 
+#ifndef TEXTBUF_LEN
+    #define TEXTBUF_LEN 1024
+#endif 
 typedef struct {
-    char* items;
-    int size;
-}HeapString;
+    char buf[TEXTBUF_LEN];
+}ShortString;
 
 StringBuilder sbuilder_init(size_t init_capacity);
 void sbuilder_resize(StringBuilder* sbuilder);
@@ -24,11 +26,9 @@ void sbuilder_push_str_(StringBuilder* sbuilder, ...);
     #define SBUILDER_MALLOC(n) malloc(sizeof(char) * (n))
 #endif // SBUILDER_MALLOC
 
-HeapString sbuilder_export(StringBuilder const* sbuilder);
-char* sbuilder_export_raw(StringBuilder const* sbuilder);
+ShortString sbuilder_export(StringBuilder const* sbuilder);
 
-HeapString shortf(char const* fmt, ...);
-void shortf_raw(char* out, char const* fmt, ...);
+ShortString shortf(char const* fmt, ...);
 
 #ifdef SBUILDER_IMPLEMENETATION
 #include <assert.h>
@@ -36,10 +36,7 @@ void shortf_raw(char* out, char const* fmt, ...);
 #include <stdlib.h>
 #include <string.h>
 
-HeapString shortf(char const* fmt, ...) {
-#ifndef TEXTBUF_LEN
-    #define TEXTBUF_LEN 1024
-#endif 
+ShortString shortf(char const* fmt, ...) {
     char buf[TEXTBUF_LEN] = {0};
     size_t size = 0;
 
@@ -58,40 +55,9 @@ HeapString shortf(char const* fmt, ...) {
         size = written;
     }
 
-    HeapString ret = {
-        SBUILDER_MALLOC(size + 1),
-        size
-    };
-    memcpy(ret.items, buf, size);
-    ret.items[size] = 0;
-    return ret;
-}
-
-char* shortf_raw(char const* fmt, ...) {
-#ifndef TEXTBUF_LEN
-    #define TEXTBUF_LEN 1024
-#endif 
-    char buf[TEXTBUF_LEN] = {0};
-    size_t size = 0;
-
-    va_list list;
-    va_start(list, fmt);
-    int written = vsnprintf(buf, TEXTBUF_LEN, fmt, list);
-    va_end(list);
-    // Stolen from https://github.com/raysan5/raylib/blob/9d67f4734b59244b5b10d45ce7c8eed76323c3b5/src/rtext.c#L1427
-    if (written >= TEXTBUF_LEN) {
-        char *truncBuffer = buf + TEXTBUF_LEN - 4; // Adding 4 bytes = "...\0"
-        sprintf(truncBuffer, "...");
-        size = TEXTBUF_LEN - 1; 
-    } else if (written < 0) {
-        size = 0;
-    } else {
-        size = written;
-    }
-
-    char* out = SBUILDER_MALLOC(size + 1);
-    memcpy(ret.items, buf, size);
-    ret.items[size] = 0;
+    ShortString out = {0};
+    memcpy(out.buf, buf, size);
+    out.buf[size] = 0;
     return out;
 }
 
@@ -126,21 +92,11 @@ void sbuilder_push_str_(StringBuilder* sbuilder, ...) {
     va_end(list);
 }
 
-HeapString sbuilder_export(StringBuilder const* sbuilder) {
-    char* heap_mem = SBUILDER_MALLOC(sbuilder->size + 1);
-    memcpy(heap_mem, sbuilder->items, sbuilder->size);
-    heap_mem[sbuilder->size] = 0;
-    return (HeapString) {
-        heap_mem,
-        sbuilder->size
-    };
-}
-
-char* sbuilder_export_raw(StringBuilder const* sbuilder) {
-    char* heap_mem = SBUILDER_MALLOC(sbuilder->size + 1);
-    memcpy(heap_mem, sbuilder->items, sbuilder->size);
-    heap_mem[sbuilder->size] = 0;
-    return heap_mem;
+ShortString sbuilder_export(StringBuilder const* sbuilder) {
+    ShortString out = {0};
+    memcpy(out.buf, sbuilder->items, sbuilder->size);
+    out.buf[sbuilder->size] = 0;
+    return out;
 }
 
 #endif // STRING_BUILDER_IMPLENTATION
