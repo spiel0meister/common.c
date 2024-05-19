@@ -26,11 +26,44 @@ void sbuilder_push_str_(StringBuilder* sbuilder, ...);
 
 HeapString sbuilder_export(StringBuilder const* sbuilder);
 
+HeapString shortf(char const* fmt, ...);
+
 #ifdef SBUILDER_IMPLEMENETATION
 #include <assert.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
+
+HeapString shortf(char const* fmt, ...) {
+#ifndef TEXTBUF_LEN
+    #define TEXTBUF_LEN 1024
+#endif 
+    char buf[TEXTBUF_LEN] = {0};
+    size_t size = 0;
+
+    va_list list;
+    va_start(list, fmt);
+    int written = vsnprintf(buf, TEXTBUF_LEN, fmt, list);
+    va_end(list);
+    // Stolen from https://github.com/raysan5/raylib/blob/9d67f4734b59244b5b10d45ce7c8eed76323c3b5/src/rtext.c#L1427
+    if (written >= TEXTBUF_LEN) {
+        char *truncBuffer = buf + TEXTBUF_LEN - 4; // Adding 4 bytes = "...\0"
+        sprintf(truncBuffer, "...");
+        size = TEXTBUF_LEN - 1; 
+    } else if (written < 0) {
+        size = 0;
+    } else {
+        size = written;
+    }
+
+    HeapString ret = {
+        SBUILDER_MALLOC(size + 1),
+        size
+    };
+    memcpy(ret.items, buf, size);
+    ret.items[size] = 0;
+    return ret;
+}
 
 void sbuilder_resize(StringBuilder* sbuilder) {
     sbuilder->capacity = sbuilder->capacity == 0 ? 2 : sbuilder->capacity * 2;
