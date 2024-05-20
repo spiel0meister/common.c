@@ -25,6 +25,8 @@ void arena_dump(Arena* arena, FILE* sink, size_t i, size_t n);
 void arena_reset(Arena* arena);
 void arena_free(Arena* arena);
 
+#endif // ARENA_H
+
 #ifdef ARENA_IMPLEMENTATION
 #include <stdlib.h>
 #include <string.h>
@@ -77,6 +79,4 @@ void arena_free(Arena* arena) {
     arena->capacity = 0;
 }
 #endif // ARENA_IMPLEMENTATION
-
-#endif // ARENA_H
 

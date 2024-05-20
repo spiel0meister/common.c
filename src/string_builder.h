@@ -30,6 +30,8 @@ char* sbuilder_export(StringBuilder const* sbuilder);
 
 __attribute__ ((format (printf, 1, 2))) ShortString shortf(char const* fmt, ...);
 
+#endif // STRING_BUILDER_H
+
 #ifdef SBUILDER_IMPLEMENTATION
 #include <assert.h>
 #include <stdarg.h>
@@ -101,4 +103,3 @@ char* sbuilder_export(StringBuilder const* sbuilder) {
 
 #endif // STRING_BUILDER_IMPLENTATION
 
-#endif // STRING_BUILDER_H
