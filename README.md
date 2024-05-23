@@ -7,3 +7,4 @@ Contains the following:
 - string_builder.h: String Builder
 - arena.h: Arena Allocator
 - asserts.h: Quality of Life Assertions
+- perf.h: A way to "benchmark" your code
