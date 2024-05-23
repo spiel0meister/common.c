@@ -22,10 +22,6 @@ void sbuilder_push(StringBuilder* sbuilder, char c);
 void sbuilder_push_str_(StringBuilder* sbuilder, ...);
 #define sbuilder_push_str(sb, ...) sbuilder_push_str_(sb, __VA_ARGS__, NULL)
 
-#ifndef SBUILDER_MALLOC
-    #define SBUILDER_MALLOC(n) malloc(sizeof(char) * (n))
-#endif // SBUILDER_MALLOC
-
 char* sbuilder_export(StringBuilder const* sbuilder);
 
 __attribute__ ((format (printf, 1, 2))) ShortString shortf(char const* fmt, ...);
@@ -33,10 +29,23 @@ __attribute__ ((format (printf, 1, 2))) ShortString shortf(char const* fmt, ...)
 #endif // STRING_BUILDER_H
 
 #ifdef SBUILDER_IMPLEMENTATION
+#ifndef SBUILDER_MALLOC
+    #define SBUILDER_MALLOC(n) malloc(sizeof(char) * (n))
+#endif // SBUILDER_MALLOC
+
 #include <assert.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
+
+StringBuilder sbuilder_init(size_t init_capacity) {
+    StringBuilder sb = {
+        malloc(init_capacity),
+        init_capacity,
+        0
+    };
+    return sb;
+}
 
 ShortString shortf(char const* fmt, ...) {
     char buf[TEXTBUF_LEN] = {0};
@@ -82,7 +91,7 @@ void sbuilder_push_str_(StringBuilder* sbuilder, ...) {
 
     char* cstr = va_arg(list, char*);
     while (cstr != NULL) {
-        size_t len = strlen(cstr);
+        int len = strlen(cstr);
         while (sbuilder->size + len >= sbuilder->capacity) {
             sbuilder_resize(sbuilder);
         }
