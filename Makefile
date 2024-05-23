@@ -1,4 +1,4 @@
-CC=gcc -std=c11
+CC=gcc -std=gnu1x
 
 test: src/main.c
-	$(CC) -ggdb $^ -o $@
+	$(CC) -ggdb -o $@ $^ 

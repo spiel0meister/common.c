@@ -1,5 +1,5 @@
-#include <stdlib.h>
-#include <time.h>
+#ifndef PERF_H
+#define PERF_H
 
 typedef struct Perf Perf;
 
@@ -8,13 +8,23 @@ Perf* perf_start(const char* label);
 double perf_timestamp_secs(Perf* perf);
 long perf_timestamp_nsecs(Perf* perf);
 
-void perf_log_secs(Perf* perf);
-void perf_log_nsecs(Perf* perf);
+void perf_log_secs_loc(Perf* perf, const char* file, unsigned int line);
+void perf_log_nsecs_loc(Perf* perf, const char* file, unsigned int line);
+
+#define perf_log_secs(perf) perf_log_secs_loc(perf, __FILE__, __LINE__)
+#define perf_log_nsecs(perf) perf_log_nsecs_loc(perf, __FILE__, __LINE__)
 
 double perf_end_secs(Perf* perf);
 long perf_end_nsecs(Perf* perf);
 
+#define perf_end(perf) PERF_FREE(perf)
+
+#endif // PERF_H
+
 #ifdef PERF_IMPLEMENTATION
+#include <stdlib.h>
+#include <time.h>
+
 struct Perf {
     const char* label;
     struct timespec start;
@@ -27,6 +37,7 @@ struct Perf {
 #ifndef PERF_FREE
     #define PERF_FREE free
 #endif
+
 Perf* perf_start(const char* label) {
     Perf* perf = PERF_MALLOC(sizeof(*perf));
 
@@ -36,7 +47,7 @@ Perf* perf_start(const char* label) {
     return perf;
 }
 
-static struct timespec ts_now() {
+static inline struct timespec ts_now() {
     struct timespec now;
     clock_gettime(CLOCK_MONOTONIC, &now);
     return now;
@@ -58,12 +69,12 @@ long perf_timestamp_nsecs(Perf* perf) {
     return now_nsecs - start_nsecs;
 }
 
-void perf_log_secs(Perf* perf) {
-    printf("%s: %fs\n", perf->label, perf_timestamp_secs(perf));
+void perf_log_secs_loc(Perf* perf, const char* file, unsigned int line) {
+    printf("[PERF] %s:%d: %s: %fs\n", file, line, perf->label, perf_timestamp_secs(perf));
 }
 
-void perf_log_nsecs(Perf* perf) {
-    printf("%s: %ldns\n", perf->label, perf_timestamp_nsecs(perf));
+void perf_log_nsecs_loc(Perf* perf, const char* file, unsigned int line) {
+    printf("[PERF] %s:%d: %s: %ldns\n", file, line, perf->label, perf_timestamp_nsecs(perf));
 }
 
 double perf_end_secs(Perf* perf) {
@@ -78,3 +89,4 @@ long perf_end_nsecs(Perf* perf) {
     return nsecs;
 }
 #endif // PERF_IMPLEMENTATION
+
