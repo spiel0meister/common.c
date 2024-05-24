@@ -17,6 +17,14 @@
             double: mapd \
         )(t, nmin, nmax, rmin, rmax)
 
+#define gcd(a, b) _Generic((a), \
+            int: gcdi, \
+            long: gcdl)(a, b)
+
+#define lcm(a, b) _Generic((a), \
+            int: lcmi, \
+            long: lcml)(a, b)
+
 #define vec2_add(v1, v2) _Generic((v1), \
             vec2i: vec2i_add, \
             vec2l: vec2l_add, \
@@ -101,6 +109,12 @@ def_vec3(double, vec3d);
 
 // Functions
 
+int gcdi(int a, int b);
+long gcdl(long a, long b);
+
+int lcmi(int a, int b);
+long lcml(long a, long b);
+
 #define decl_lerp(type, name) \
 type name(float t, type min, type max)
 
@@ -166,6 +180,7 @@ decl_vec_op(vec3d, vec3d_div);
 
 #ifdef BMATH_IMPLEMENTATION
 #include <assert.h>
+#include <stdlib.h>
 
 #define impl_lerp(type, name) \
 inline type name(float t, type min, type max) { \
@@ -255,5 +270,39 @@ impl_vec3_op(vec3f, vec3f_div, /);
 impl_vec3_op(vec3d, vec3d_div, /);
 
 #undef impl_vec3_op
+
+inline int gcdi(int a, int b) {
+    int a_tmp = a;
+    while (b != 0) {
+        a_tmp = a;
+        a = b;
+        b = a_tmp % b;
+    }
+    
+    return a;
+}
+
+inline long gcdl(long a, long b) {
+    long a_tmp = a;
+    while (b != 0) {
+        a_tmp = a;
+        a = b;
+        b = a_tmp % b;
+    }
+    
+    return a;
+}
+
+inline int lcmi(int a, int b) {
+    if (a == 0 || b == 0) return 0;
+
+    return abs(a * b) / gcd(a, b);
+}
+
+inline long lcml(long a, long b) {
+    if (a == 0 || b == 0) return 0;
+
+    return labs(a * b) / gcd(a, b);
+}
 
 #endif // BMATH_IMPLEMENTATION
