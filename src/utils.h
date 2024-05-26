@@ -15,7 +15,7 @@ char* read_entire_file(char* filepath);
 #include <stdio.h>
 
 char* argv_pop(int* argc, char*** argv) {
-    assert(argc > 0);
+    if (*argc < 1) return NULL;
     (*argc)++;
     return *(*argv)++;
 }
