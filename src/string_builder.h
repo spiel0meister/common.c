@@ -1,6 +1,7 @@
 #ifndef STRING_BUILDER_H
 #define STRING_BUILDER_H
 #include <stddef.h>
+#include <stdbool.h>
 
 typedef struct {
     const char* start;
@@ -30,6 +31,9 @@ void sbuilder_push_str_(StringBuilder* sbuilder, ...);
 char* sbuilder_export(StringBuilder const* sbuilder);
 
 __attribute__ ((format (printf, 1, 2))) ShortString shortf(char const* fmt, ...);
+
+bool short_endswith(ShortString str, const char* cstr);
+bool short_startswith(ShortString str, const char* cstr);
 
 #endif // STRING_BUILDER_H
 
@@ -113,6 +117,23 @@ char* sbuilder_export(StringBuilder const* sbuilder) {
     memcpy(heap_mem, sbuilder->items, sbuilder->size);
     heap_mem[sbuilder->size] = 0;
     return heap_mem;
+}
+
+bool short_endswith(ShortString str, const char* cstr) {
+    for (int i = strlen(str.buf) - 1, j = strlen(cstr) - 1; i >= 0 && j >= 0; --i) {
+        if (str.buf[i] != cstr[j--]) return false;
+    }
+
+    return true;
+}
+
+
+bool short_startswith(ShortString str, const char* cstr) {
+    for (int i = 0, j = 0; i < (int)strlen(str.buf); ++i) {
+        if (str.buf[i] != cstr[j++]) return false;
+    }
+
+    return true;
 }
 
 #endif // STRING_BUILDER_IMPLENTATION
