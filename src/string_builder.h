@@ -3,6 +3,11 @@
 #include <stddef.h>
 
 typedef struct {
+    const char* start;
+    size_t size;
+}StringView;
+
+typedef struct {
     char* items;
     int size;
     int capacity;
