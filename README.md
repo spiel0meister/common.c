@@ -10,3 +10,4 @@ Contains the following:
 - [bmath.h](./src/bmath.h): Some math functions and types missing in `math.h`
 - [random.h](./src/random.h): Missing random functions
 - [utils.h](./src/utils.h): Stuff with no category
+- [log.h](./src/log.h): Logging
