@@ -49,7 +49,11 @@ void log_log(LogLevel level, const char* fmt, ...) {
 
     va_list args;
     va_start(args, fmt);
-    if (level >= logger.level) {
+    if (logger.file == stdout) {
+        fprintf(logger.file,"[%s] ", LEVEL_TO_STR[level]);
+        vfprintf(logger.file, fmt, args);
+        fprintf(logger.file, "\n");
+    } else if (level >= logger.level) {
         fprintf(logger.file,"[%s] ", LEVEL_TO_STR[level]);
         vfprintf(logger.file, fmt, args);
         fprintf(logger.file, "\n");
