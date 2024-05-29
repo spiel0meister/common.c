@@ -2,6 +2,7 @@
 #define UTILS_H
 
 #define loop while (true)
+#define ATTR_PRINTF(fmt_pos, va_pos) __attribute__((format(printf, fmt_pos, va_pos)))
 
 char* argv_pop(int* argc, char*** argv);
 
