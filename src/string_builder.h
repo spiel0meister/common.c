@@ -1,25 +1,12 @@
 #ifndef STRING_BUILDER_H
 #define STRING_BUILDER_H
 #include <stddef.h>
-#include <stdbool.h>
-
-typedef struct {
-    const char* start;
-    size_t size;
-}StringView;
 
 typedef struct {
     char* items;
     int size;
     int capacity;
 }StringBuilder;
-
-#ifndef TEXTBUF_LEN
-    #define TEXTBUF_LEN 1024
-#endif 
-typedef struct {
-    char buf[TEXTBUF_LEN];
-}ShortString;
 
 StringBuilder sbuilder_init(size_t init_capacity);
 void sbuilder_resize(StringBuilder* sbuilder);
@@ -29,11 +16,6 @@ void sbuilder_push_str_(StringBuilder* sbuilder, ...);
 #define sbuilder_push_str(sb, ...) sbuilder_push_str_(sb, __VA_ARGS__, NULL)
 
 char* sbuilder_export(StringBuilder const* sbuilder);
-
-__attribute__ ((format (printf, 1, 2))) ShortString shortf(char const* fmt, ...);
-
-bool short_endswith(ShortString str, const char* cstr);
-bool short_startswith(ShortString str, const char* cstr);
 
 #endif // STRING_BUILDER_H
 
@@ -54,31 +36,6 @@ StringBuilder sbuilder_init(size_t init_capacity) {
         0
     };
     return sb;
-}
-
-ShortString shortf(char const* fmt, ...) {
-    char buf[TEXTBUF_LEN] = {0};
-    size_t size = 0;
-
-    va_list list;
-    va_start(list, fmt);
-    int written = vsnprintf(buf, TEXTBUF_LEN, fmt, list);
-    va_end(list);
-    // Stolen from https://github.com/raysan5/raylib/blob/9d67f4734b59244b5b10d45ce7c8eed76323c3b5/src/rtext.c#L1427
-    if (written >= TEXTBUF_LEN) {
-        char *truncBuffer = buf + TEXTBUF_LEN - 4; // Adding 4 bytes = "...\0"
-        sprintf(truncBuffer, "...");
-        size = TEXTBUF_LEN - 1; 
-    } else if (written < 0) {
-        size = 0;
-    } else {
-        size = written;
-    }
-
-    ShortString out = {0};
-    memcpy(out.buf, buf, size);
-    out.buf[size] = 0;
-    return out;
 }
 
 void sbuilder_resize(StringBuilder* sbuilder) {
@@ -117,23 +74,6 @@ char* sbuilder_export(StringBuilder const* sbuilder) {
     memcpy(heap_mem, sbuilder->items, sbuilder->size);
     heap_mem[sbuilder->size] = 0;
     return heap_mem;
-}
-
-bool short_endswith(ShortString str, const char* cstr) {
-    for (int i = strlen(str.buf) - 1, j = strlen(cstr) - 1; i >= 0 && j >= 0; --i) {
-        if (str.buf[i] != cstr[j--]) return false;
-    }
-
-    return true;
-}
-
-
-bool short_startswith(ShortString str, const char* cstr) {
-    for (int i = 0, j = 0; i < (int)strlen(str.buf); ++i) {
-        if (str.buf[i] != cstr[j++]) return false;
-    }
-
-    return true;
 }
 
 #endif // STRING_BUILDER_IMPLENTATION
