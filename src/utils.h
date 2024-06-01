@@ -4,6 +4,8 @@
 #define loop while (true)
 #define ATTR_PRINTF(fmt_pos, va_pos) __attribute__((format(printf, fmt_pos, va_pos)))
 
+#define ARRAY_LEN(arr) (sizeof(arr)/sizeof((arr)[0]))
+
 char* argv_pop(int* argc, char*** argv);
 
 char* read_entire_file(char* filepath);
@@ -22,7 +24,7 @@ char* argv_pop(int* argc, char*** argv) {
 }
 
 #ifndef FILE_CONTENT_MALLOC 
-#define FILE_CONTENT_MALLOC malloc
+    #define FILE_CONTENT_MALLOC(n) malloc(sizeof(char) * (n))
 #endif
 char* read_entire_file(char* filepath) {
     FILE *f = fopen(filepath, "rb");
