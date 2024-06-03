@@ -16,6 +16,7 @@ void sbuilder_push_str_(StringBuilder* sbuilder, ...);
 #define sbuilder_push_str(sb, ...) sbuilder_push_str_(sb, __VA_ARGS__, NULL)
 
 char* sbuilder_export(StringBuilder const* sbuilder);
+void sbuilder_export_inplace(StringBuilder const* sbuilder, char* dst);
 
 #endif // STRING_BUILDER_H
 
@@ -74,6 +75,10 @@ char* sbuilder_export(StringBuilder const* sbuilder) {
     memcpy(heap_mem, sbuilder->items, sbuilder->size);
     heap_mem[sbuilder->size] = 0;
     return heap_mem;
+}
+
+void sbuilder_export_inplace(StringBuilder const* sbuilder, char* dst) {
+    memcpy(dst, sbuilder->items, sbuilder->size);
 }
 
 #endif // STRING_BUILDER_IMPLENTATION
