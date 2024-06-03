@@ -3,7 +3,6 @@
 
 // Random int (inclusive)
 int randint(int min, int max);
-char randchar();
 float random();
 
 #endif // RANDOM_H
@@ -13,10 +12,6 @@ float random();
 
 int randint(int min, int max) {
     return min + rand() % (max - min + 1);
-}
-
-char randchar() {
-    return randint(0, 256);
 }
 
 float random() {

@@ -18,6 +18,8 @@ void sbuilder_push_str_(StringBuilder* sbuilder, ...);
 char* sbuilder_export(StringBuilder const* sbuilder);
 void sbuilder_export_inplace(StringBuilder const* sbuilder, char* dst);
 
+void sbuilder_free(StringBuilder* sbuilder);
+
 #endif // STRING_BUILDER_H
 
 #ifdef SBUILDER_IMPLEMENTATION
@@ -33,8 +35,8 @@ void sbuilder_export_inplace(StringBuilder const* sbuilder, char* dst);
 StringBuilder sbuilder_init(size_t init_capacity) {
     StringBuilder sb = {
         malloc(init_capacity),
+        0,
         init_capacity,
-        0
     };
     return sb;
 }
@@ -79,6 +81,12 @@ char* sbuilder_export(StringBuilder const* sbuilder) {
 
 void sbuilder_export_inplace(StringBuilder const* sbuilder, char* dst) {
     memcpy(dst, sbuilder->items, sbuilder->size);
+}
+
+void sbuilder_free(StringBuilder* sbuilder) {
+    sbuilder->size = 0;
+    sbuilder->capacity = 0;
+    free(sbuilder->items);
 }
 
 #endif // STRING_BUILDER_IMPLENTATION
