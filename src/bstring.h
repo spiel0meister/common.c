@@ -82,8 +82,8 @@ bool str_endswith(const char* str, const char* cstr) {
 }
 
 bool str_startswith(const char* str, const char* cstr) {
-    for (int i = 0, j = 0; i < (int)strlen(str); ++i) {
-        if (str[i] != cstr[j++]) return false;
+    for (int i = 0, j = 0; i < (int)strlen(str) && j < (int)strlen(cstr);) {
+        if (str[i++] != cstr[j++]) return false;
     }
 
     return true;
