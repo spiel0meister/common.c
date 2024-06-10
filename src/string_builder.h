@@ -4,20 +4,32 @@
 
 typedef struct {
     char* items;
-    int size;
-    int capacity;
+    size_t size;
+    size_t capacity;
 }StringBuilder;
 
+// Initializes a string builder 
 StringBuilder sbuilder_init(size_t init_capacity);
+// Resizes a string builder 
 void sbuilder_resize(StringBuilder* sbuilder);
 
+// Pushes a character to a string builder 
 void sbuilder_push(StringBuilder* sbuilder, char c);
+
 void sbuilder_push_str_(StringBuilder* sbuilder, ...);
+
+// Pushes a variadic amount of cstrings to a string builder 
 #define sbuilder_push_str(sb, ...) sbuilder_push_str_(sb, __VA_ARGS__, NULL)
 
+// Pushes a sized string of certain length to a string builder 
+void sbuilder_push_nstr(StringBuilder* self, const char* str, size_t len);
+
+// Exports the contents of a string builder to heap memory 
 char* sbuilder_export(StringBuilder const* sbuilder);
+// Exports the contents of a string builder to to provided DST 
 void sbuilder_export_inplace(StringBuilder const* sbuilder, char* dst);
 
+// Frees a string builder
 void sbuilder_free(StringBuilder* sbuilder);
 
 #endif // STRING_BUILDER_H
@@ -70,6 +82,12 @@ void sbuilder_push_str_(StringBuilder* sbuilder, ...) {
     }
 
     va_end(list);
+}
+
+void sbuilder_push_nstr(StringBuilder* self, const char* str, size_t len) {
+    while (self->size + len >= self->capacity) sbuilder_resize(self);
+    memcpy(self->items + self->size, str, len);
+    self->size += len;
 }
 
 char* sbuilder_export(StringBuilder const* sbuilder) {
