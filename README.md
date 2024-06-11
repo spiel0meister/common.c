@@ -12,3 +12,4 @@ Contains the following:
 - [random.h](./src/random.h): Missing random functions
 - [utils.h](./src/utils.h): Stuff with no category
 - [log.h](./src/log.h): Logging
+- [cperf.h](./src/cperf.h): "Benchmarking" C Code
