@@ -3,6 +3,8 @@
 
 #define DA_INIT_CAP 256
 
+#define DA(type) type* items; size_t count; size_t capacity
+
 #define da_append(da, item) \
     if ((da)->count == (da)->capacity) { \
         (da)->capacity = (da)->capacity == 0? DA_INIT_CAP : (da)->capacity * 2; \
