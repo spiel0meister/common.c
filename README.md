@@ -13,3 +13,4 @@ Contains the following:
 - [utils.h](./src/utils.h): Stuff with no category
 - [log.h](./src/log.h): Logging
 - [cperf.h](./src/cperf.h): "Benchmarking" C Code
+- [string_view.h](./src/string_view.h): Simple string view
