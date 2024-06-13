@@ -15,6 +15,12 @@ typedef struct {
     size_t len;
 }StringView;
 
+typedef struct {
+    StringView* items;
+    size_t count;
+    size_t capacity;
+}StringSplit;
+
 // Creates a StringView from a C string
 StringView sv_from_cstr(const char* str);
 
@@ -26,9 +32,27 @@ StringView sv_chop_by_pred(StringView* sv, predicate_t pred);
 StringView sv_trim_left_pred(StringView sv, predicate_t pred);
 StringView sv_trim_right_pred(StringView sv, predicate_t pred);
 
+StringSplit sv_split(StringView sv, char c);
+StringSplit sv_split_pred(StringView sv, predicate_t pred);
+
 #ifdef STRING_VIEW_IMPLEMENTATION
+#include <assert.h>
 #include <string.h>
+#include <stdlib.h>
 #include <ctype.h>
+
+static void split_maybe_resize(StringSplit* split) {
+    if (split->count == split->capacity) {
+        split->capacity = split->capacity == 0? 2 : split->capacity * 2;
+        split->items = realloc(split->items, sizeof(*split->items) * split->capacity);
+        assert(split->items != NULL);
+    }
+}
+
+static void split_append(StringSplit* split, StringView sv) {
+    split_maybe_resize(split);
+    split->items[split->count++] = sv;
+}
 
 StringView sv_from_cstr(const char* str) {
     return (StringView) { .start = str, .len = strlen(str) };
@@ -63,7 +87,7 @@ StringView sv_chop_by_c(StringView* sv, char delim) {
 }
 
 StringView sv_trim_left(StringView sv) {
-    while (isspace(sv.start[0])) {
+    while (sv.len > 0 && isspace(sv.start[0])) {
         ++sv.start;
         --sv.len;
     }
@@ -72,11 +96,19 @@ StringView sv_trim_left(StringView sv) {
 }
 
 StringView sv_trim_right(StringView sv) {
-    while (isspace(sv.start[sv.len - 1])) {
+    while (sv.len > 0 && isspace(sv.start[sv.len - 1])) {
         --sv.len;
     }
 
     return sv;
+}
+
+StringSplit sv_split(StringView sv, char c) {
+    StringSplit split = {};   
+    while (sv.len > 0) {
+        split_append(&split, sv_chop_by_c(&sv, c));
+    }
+    return split;
 }
 
 StringView sv_chop_by_pred(StringView* sv, predicate_t pred) {
@@ -122,6 +154,14 @@ StringView sv_trim_right_pred(StringView sv, predicate_t pred) {
     }
 
     return sv;
+}
+
+StringSplit sv_split_pred(StringView sv, predicate_t pred) {
+    StringSplit split = {};   
+    while (sv.len > 0) {
+        split_append(&split, sv_chop_by_pred(&sv, pred));
+    }
+    return split;
 }
 
 #endif // STRING_VIEW_IMPLEMENTATION
