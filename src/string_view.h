@@ -27,10 +27,12 @@ StringView sv_from_cstr(const char* str);
 StringView sv_chop_by_c(StringView* sv, char delim);
 StringView sv_trim_left(StringView sv);
 StringView sv_trim_right(StringView sv);
+StringView sv_trim(StringView sv);
 
 StringView sv_chop_by_pred(StringView* sv, predicate_t pred);
 StringView sv_trim_left_pred(StringView sv, predicate_t pred);
 StringView sv_trim_right_pred(StringView sv, predicate_t pred);
+StringView sv_trim_pred(StringView sv, predicate_t pred);
 
 StringSplit sv_split(StringView sv, char c);
 StringSplit sv_split_pred(StringView sv, predicate_t pred);
@@ -103,6 +105,10 @@ StringView sv_trim_right(StringView sv) {
     return sv;
 }
 
+StringView sv_trim(StringView sv) {
+    return sv_trim_left(sv_trim_right(sv));
+}
+
 StringSplit sv_split(StringView sv, char c) {
     StringSplit split = {};   
     while (sv.len > 0) {
@@ -154,6 +160,10 @@ StringView sv_trim_right_pred(StringView sv, predicate_t pred) {
     }
 
     return sv;
+}
+
+StringView sv_trim_pred(StringView sv, predicate_t pred) {
+    return sv_trim_left_pred(sv_trim_right_pred(sv, pred), pred);
 }
 
 StringSplit sv_split_pred(StringView sv, predicate_t pred) {
