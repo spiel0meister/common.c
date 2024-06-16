@@ -3,7 +3,7 @@
 
 #define DA_INIT_CAP 256
 
-#define DA(type) type* items; size_t count; size_t capacity
+#define DA(Type) Type* items; size_t count; size_t capacity
 
 #define da_append(da, item) \
     if ((da)->count == (da)->capacity) { \
