@@ -41,22 +41,15 @@ static char* LEVEL_TO_STR[] = {
 static Logger logger = { LOG_INFO, NULL };
 void log_log(LogLevel level, const char* fmt, ...) {
     if (logger.file == NULL) {
-        printf("[%s] ", LEVEL_TO_STR[LOG_INFO]);
-        printf("log file not set, default to stdout");
-        printf("\n");
         logger.file = stdout;
+        log_info("log file not set, default to stdout\n");
     }
 
     va_list args;
     va_start(args, fmt);
-    if (logger.file == stdout) {
-        fprintf(logger.file,"[%s] ", LEVEL_TO_STR[level]);
+    if (level >= logger.level) {
+        fprintf(logger.file, "[%s] ", LEVEL_TO_STR[level]);
         vfprintf(logger.file, fmt, args);
-        fprintf(logger.file, "\n");
-    } else if (level >= logger.level) {
-        fprintf(logger.file,"[%s] ", LEVEL_TO_STR[level]);
-        vfprintf(logger.file, fmt, args);
-        fprintf(logger.file, "\n");
     }
     va_end(args);
 }
