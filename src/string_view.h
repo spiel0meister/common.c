@@ -68,7 +68,7 @@ StringView sv_chop_by_c(StringView* sv, char delim) {
             const char* frag_end = &sv->start[i + 1]; 
 
             out.start = sv->start;
-            out.len = frag_end - sv->start;
+            out.len = frag_end - sv->start - 1;
 
             sv->start = frag_end;
             sv->len = sv->len - i - 1;
