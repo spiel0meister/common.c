@@ -2,109 +2,106 @@
 #define STRING_BUILDER_H
 #include <stddef.h>
 
+#ifndef SB_INIT_CAP
+#define SB_INIT_CAP 8
+#endif // SB_INIT_CAP
+
 typedef struct {
     char* items;
-    size_t size;
+    size_t count;
     size_t capacity;
 }StringBuilder;
 
-// Initializes a string builder 
-StringBuilder sbuilder_init(size_t init_capacity);
 // Resizes a string builder 
-void sbuilder_resize(StringBuilder* sbuilder);
+void sb_maybe_resize(StringBuilder* sb, size_t to_append_len);
 
 // Pushes a character to a string builder 
-void sbuilder_push(StringBuilder* sbuilder, char c);
+void sb_push(StringBuilder* sb, char c);
 
-void sbuilder_push_str_(StringBuilder* sbuilder, ...);
+void sb_push_str_null(StringBuilder* sb, ...);
 
 // Pushes a variadic amount of cstrings to a string builder 
-#define sbuilder_push_str(sb, ...) sbuilder_push_str_(sb, __VA_ARGS__, NULL)
+#define sb_push_str(sb, ...) sb_push_str_null(sb, __VA_ARGS__, NULL)
 
 // Pushes a sized string of certain length to a string builder 
-void sbuilder_push_nstr(StringBuilder* self, const char* str, size_t len);
+void sb_push_nstr(StringBuilder* self, const char* str, size_t len);
 
 // Exports the contents of a string builder to heap memory 
-char* sbuilder_export(StringBuilder const* sbuilder);
+char* sb_export(StringBuilder const* sb);
+
 // Exports the contents of a string builder to to provided DST 
-void sbuilder_export_inplace(StringBuilder const* sbuilder, char* dst);
+void sb_export_inplace(StringBuilder const* sb, char dst[sb->count]);
 
 // Frees a string builder
-void sbuilder_free(StringBuilder* sbuilder);
+void sb_free(StringBuilder* sb);
 
 #endif // STRING_BUILDER_H
 
-#ifdef SBUILDER_IMPLEMENTATION
-#ifndef SBUILDER_MALLOC
-    #define SBUILDER_MALLOC(n) malloc(sizeof(char) * (n))
-#endif // SBUILDER_MALLOC
+#ifdef SB_IMPLEMENTATION
+#ifndef SB_MALLOC
+    #define SB_MALLOC malloc
+#endif // SB_MALLOC
 
 #include <assert.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 
-StringBuilder sbuilder_init(size_t init_capacity) {
-    StringBuilder sb = {
-        malloc(init_capacity),
-        0,
-        init_capacity,
-    };
-    return sb;
-}
+void sb_maybe_resize(StringBuilder* sb, size_t to_append_len) {
+    if (sb->count + to_append_len >= sb->capacity) {
+        if (sb->capacity == 0) sb->capacity = SB_INIT_CAP;
+        while (sb->count + to_append_len >= sb->capacity) {
+            sb->capacity *= 2;
+        }
 
-void sbuilder_resize(StringBuilder* sbuilder) {
-    sbuilder->capacity = sbuilder->capacity == 0 ? 2 : sbuilder->capacity * 2;
-    sbuilder->items = realloc(sbuilder->items, sizeof(sbuilder->items[0]) * sbuilder->capacity);
-    assert(sbuilder->items != NULL);
-}
-
-void sbuilder_push(StringBuilder* sbuilder, char c) {
-    if (sbuilder->size + 1 >= sbuilder->capacity) {
-        sbuilder_resize(sbuilder);
+        sb->items = realloc(sb->items, sizeof(sb->items[0]) * sb->capacity);
+        assert(sb->items != NULL);
     }
-    sbuilder->items[sbuilder->size++] = c;
 }
 
-void sbuilder_push_str_(StringBuilder* sbuilder, ...) {
-    va_list list;
-    va_start(list, sbuilder);
+void sb_push(StringBuilder* sb, char c) {
+    sb_maybe_resize(sb, 1);
+    sb->items[sb->count++] = c;
+}
 
-    char* cstr = va_arg(list, char*);
+void sb_push_str_null(StringBuilder* sb, ...) {
+    va_list list;
+    va_start(list, sb);
+
+    const char* cstr = va_arg(list, const char*);
     while (cstr != NULL) {
         int len = strlen(cstr);
-        while (sbuilder->size + len >= sbuilder->capacity) {
-            sbuilder_resize(sbuilder);
-        }
-        memcpy(sbuilder->items + sbuilder->size, cstr, len);
-        sbuilder->size += len;
+        sb_maybe_resize(sb, len);
+        memcpy(sb->items + sb->count, cstr, len);
+        sb->count += len;
         cstr = va_arg(list, char*);
     }
 
     va_end(list);
 }
 
-void sbuilder_push_nstr(StringBuilder* self, const char* str, size_t len) {
-    while (self->size + len >= self->capacity) sbuilder_resize(self);
-    memcpy(self->items + self->size, str, len);
-    self->size += len;
+void sb_push_nstr(StringBuilder* sb, const char* str, size_t len) {
+    sb_maybe_resize(sb, len);
+    memcpy(sb->items + sb->count, str, len);
+    sb->count += len;
 }
 
-char* sbuilder_export(StringBuilder const* sbuilder) {
-    char* heap_mem = SBUILDER_MALLOC(sbuilder->size + 1);
-    memcpy(heap_mem, sbuilder->items, sbuilder->size);
-    heap_mem[sbuilder->size] = 0;
-    return heap_mem;
+char* sb_export(StringBuilder const* sb) {
+    char* out = SB_MALLOC(sizeof(char) * (sb->count + 1));
+    memcpy(out, sb->items, sb->count);
+    out[sb->count] = 0;
+    return out;
 }
 
-void sbuilder_export_inplace(StringBuilder const* sbuilder, char* dst) {
-    memcpy(dst, sbuilder->items, sbuilder->size);
+void sb_export_inplace(StringBuilder const* sb, char dst[sb->count]) {
+    memcpy(dst, sb->items, sb->count);
 }
 
-void sbuilder_free(StringBuilder* sbuilder) {
-    sbuilder->size = 0;
-    sbuilder->capacity = 0;
-    free(sbuilder->items);
+void sb_free(StringBuilder* sb) {
+    free(sb->items);
+    sb->items = NULL;
+    sb->count = 0;
+    sb->capacity = 0;
 }
 
 #endif // STRING_BUILDER_IMPLENTATION
