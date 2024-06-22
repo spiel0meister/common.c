@@ -8,20 +8,18 @@ typedef struct {
     size_t capacity;
 }Arena;
 
-#define arena_alloc(arena, type) (type*)arena_alloc_s(arena, sizeof(type))
-#define arena_alloc_array(arena, type, n) (type*)arena_alloc_s(arena, sizeof(type) * (n))
-#define arena_calloc(arena, type) (type*)arena_calloc_s(arena, sizeof(type))
-#define arena_calloc_array(arena, type, n) (type*)arena_calloc_s(arena, sizeof(type) * (n))
+#define arena_alloc(arena, Type) (Type*)arena_alloc_s(arena, sizeof(Type))
+#define arena_calloc(arena, Type) (Type*)arena_calloc_s(arena, sizeof(Type))
 
-#define arena_dump_all(arena, sink) arena_dump(arena, sink, 0, (arena)->size)
+#define arena_alloc_array(arena, n, Type) (Type*)arena_alloc_s(arena, sizeof(Type) * (n))
+#define arena_calloc_array(arena, n, Type) (Type*)arena_calloc_s(arena, sizeof(Type) * (n))
 
 void arena_prealloc(Arena* arena, size_t capacity);
 
 void* arena_alloc_s(Arena* arena, size_t size);
 void* arena_calloc_s(Arena* arena, size_t size);
+void* arena_memdup(Arena* arena, void* mem, size_t size);
 
-int arena_alloced(Arena* arena);
-void arena_dump(Arena* arena, FILE* sink, size_t i, size_t n);
 void arena_reset(Arena* arena);
 void arena_free(Arena* arena);
 
@@ -52,20 +50,17 @@ void* arena_calloc_s(Arena* arena, size_t size) {
     return p;
 }
 
-int arena_alloced(Arena* arena) {
-    return arena->mem != NULL;
+void* arena_memdup(Arena* arena, void* mem, size_t size) {
+    void* dup = arena_alloc_s(arena, size);
+    memcpy(dup, mem, size);
+    return dup;
 }
 
-void arena_dump(Arena* arena, FILE* sink, size_t i, size_t n) {
-    char* start = (char*)&arena->mem[i];
-    for (size_t j = 0; j < n; ++j) {
-        if (j != n - 1) {
-            fprintf(sink, "%02x ", *start);
-        } else {
-            fprintf(sink, "%02x\n", *start);
-        }
-        start++;
-    }
+char* arena_strdup(Arena* arena, const char* cstr) {
+    size_t size = strlen(cstr);
+    char* dup = arena_alloc_array(arena, size, char);
+    memcpy(dup, cstr, size);
+    return dup;
 }
 
 void arena_reset(Arena* arena) {
