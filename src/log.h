@@ -16,9 +16,7 @@ typedef enum {
 
 __attribute__((format(printf, 2, 3)))
 void log_log(LogLevel level, const char* fmt, ...);
-
 void log_set_file(FILE* f);
-
 void log_set_level(LogLevel level);
 
 #endif // LOG_H
