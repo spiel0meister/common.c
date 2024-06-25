@@ -37,7 +37,10 @@ StringView sv_trim_pred(StringView sv, predicate_t pred);
 StringSplit sv_split(StringView sv, char c);
 StringSplit sv_split_pred(StringView sv, predicate_t pred);
 
-#ifdef STRING_VIEW_IMPLEMENTATION
+bool sv_cmpc(StringView sv, const char* cstr);
+bool sv_cmpsv(StringView sv, StringView that);
+
+#ifdef SV_IMPLEMENTATION
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
@@ -172,6 +175,26 @@ StringSplit sv_split_pred(StringView sv, predicate_t pred) {
         split_append(&split, sv_chop_by_pred(&sv, pred));
     }
     return split;
+}
+
+bool sv_cmpc(StringView sv, const char* cstr) {
+    if (sv.len != strlen(cstr)) return false;
+
+    for (size_t i = 0; i < sv.len; ++i) {
+        if (sv.start[i] != cstr[i]) return false;
+    }
+
+    return true;
+}
+
+bool sv_cmpsv(StringView sv, StringView that) {
+    if (sv.len != that.len) return false;
+
+    for (size_t i = 0; i < sv.len; ++i) {
+        if (sv.start[i] != that.start[i]) return false;
+    }
+
+    return true;
 }
 
 #endif // STRING_VIEW_IMPLEMENTATION
