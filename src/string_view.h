@@ -1,6 +1,5 @@
 #ifndef STIRNG_VIEW
 #define STIRNG_VIEW
-#endif // STIRNG_VIEW
 
 #include <stddef.h>
 #include <stdbool.h>
@@ -39,6 +38,8 @@ StringSplit sv_split_pred(StringView sv, predicate_t pred);
 
 bool sv_cmpc(StringView sv, const char* cstr);
 bool sv_cmpsv(StringView sv, StringView that);
+
+#endif // STIRNG_VIEW
 
 #ifdef SV_IMPLEMENTATION
 #include <assert.h>
