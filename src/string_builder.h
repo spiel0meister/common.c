@@ -26,6 +26,11 @@ void sb_push_str_null(StringBuilder* sb, ...);
 // Pushes a sized string of certain length to a string builder 
 void sb_push_nstr(StringBuilder* self, const char* str, size_t len);
 
+// Writes the contents of a string builder to a file handle
+#define sb_fwrite(sb, f) fwrite((sb)->items, 1, (sb)->count, f)
+// Writes the contents of a string builder to a file
+bool sb_write_file(StringBuilder* self, const char* filepath);
+
 // Reads the provided file and appends its contents into the provided SB.
 bool sb_read_file(StringBuilder* sb, const char* filepath); 
 
@@ -106,6 +111,18 @@ bool sb_read_file(StringBuilder* sb, const char* filepath) {
     fclose(f);
     return true;
 } 
+
+bool sb_write_file(StringBuilder* self, const char* filepath) {
+    FILE* f = fopen(filepath, "wb");
+    if (f == NULL) return false;
+
+    int n = sb_fwrite(self, f);
+    assert(n == (int)self->count);
+
+    fclose(f);
+
+    return true;
+}
 
 char* sb_export(StringBuilder const* sb) {
     char* out = SB_MALLOC(sizeof(char) * (sb->count + 1));
