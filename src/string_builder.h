@@ -49,6 +49,7 @@ void sb_free(StringBuilder* sb);
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 void sb_maybe_resize(StringBuilder* sb, size_t to_append_len) {
     if (sb->count + to_append_len >= sb->capacity) {

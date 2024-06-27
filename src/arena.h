@@ -19,6 +19,8 @@ void arena_prealloc(Arena* arena, size_t capacity);
 void* arena_allocb(Arena* arena, size_t size);
 void* arena_callocb(Arena* arena, size_t size);
 void* arena_memdupb(Arena* arena, void* mem, size_t size);
+char* arena_strdup(Arena* arena, const char* cstr);
+char* arena_sprintf(Arena* arena, const char* restrict fmt, ...);
 
 void arena_reset(Arena* arena);
 void arena_free(Arena* arena);
@@ -61,6 +63,20 @@ char* arena_strdup(Arena* arena, const char* cstr) {
     char* dup = arena_alloc_array(arena, size, char);
     memcpy(dup, cstr, size);
     return dup;
+}
+
+char* arena_sprintf(Arena* restrict arena, const char* restrict fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    int n = vsnprintf(NULL, 0, fmt, args);
+    va_end(args);
+
+    va_start(args, fmt);
+    char* cstr = arena_alloc_array(arena, n + 1, char);
+    vsnprintf(cstr, n + 1, fmt, args);
+    va_end(args);
+
+    return cstr;
 }
 
 void arena_reset(Arena* arena) {
