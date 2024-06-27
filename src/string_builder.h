@@ -20,8 +20,11 @@ void sb_maybe_resize(StringBuilder* sb, size_t to_append_len);
 void sb_push(StringBuilder* sb, char c);
 
 void sb_push_str_null(StringBuilder* sb, ...);
-// Pushes a variadic amount of cstrings to a string builder 
+// Pushes a variadic amount of null-terminated strings to a string builder 
 #define sb_push_str(sb, ...) sb_push_str_null(sb, __VA_ARGS__, NULL)
+
+// Pushes a formatted string to a string builder
+void sb_push_sprintf(StringBuilder* sb, const char* restrict fmt, ...);
 
 // Pushes a sized string of certain length to a string builder 
 void sb_push_nstr(StringBuilder* self, const char* str, size_t len);
@@ -93,6 +96,22 @@ void sb_push_nstr(StringBuilder* sb, const char* str, size_t len) {
     sb_maybe_resize(sb, len);
     memcpy(sb->items + sb->count, str, len);
     sb->count += len;
+}
+
+void sb_push_sprintf(StringBuilder* sb, const char* restrict fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    int n = vsnprintf(NULL, 0, fmt, args);
+    va_end(args);
+
+    va_start(args, fmt);
+
+    sb_maybe_resize(sb, n);
+    int n_ = vsnprintf(sb->items + sb->count, n, fmt, args);
+    assert(n_ == n);
+    sb->count += n_ - 1;
+
+    va_end(args);
 }
 
 bool sb_read_file(StringBuilder* sb, const char* filepath) {
