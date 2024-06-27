@@ -54,6 +54,8 @@ void* arena_callocb(Arena* arena, size_t size) {
 
 void* arena_memdupb(Arena* arena, void* mem, size_t size) {
     void* dup = arena_allocb(arena, size);
+    if (dup == NULL) return NULL;
+
     memcpy(dup, mem, size);
     return dup;
 }
@@ -61,6 +63,8 @@ void* arena_memdupb(Arena* arena, void* mem, size_t size) {
 char* arena_strdup(Arena* arena, const char* cstr) {
     size_t size = strlen(cstr);
     char* dup = arena_alloc_array(arena, size, char);
+    if (dup == NULL) return NULL;
+
     memcpy(dup, cstr, size);
     return dup;
 }
