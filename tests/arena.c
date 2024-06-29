@@ -7,7 +7,7 @@
 Test(arena_prealloc_test) {
     Arena arena = {};
     arena_prealloc(&arena, sizeof(int) * 1);
-    test_assert(arena_alloced(&arena));
+    test_assert(arena.mem != NULL);
 
     arena_free(&arena);
 

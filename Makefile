@@ -1,13 +1,15 @@
-CC=gcc -std=c2x
+CC=gcc
+CFLAGS=-Wall -Wextra -ggdb
 
-test: main.c
-	gcc -Wall -Wextra -ggdb -o $@ $^
+MODS=arena cperf da log string_builder string_view
+test: main.c $(foreach mod, $(MODS), src/$(mod).h)
+	gcc $(CFLAGS) -o $@ $<
 
-TESTS=arena bstring random string_builder
-tests: $(foreach test, $(TESTS), test/$(test))
+TESTS=arena string_builder
+tests: $(foreach test, $(TESTS), tests/$(test) test/$(test))
 
 tests/%: tests/%.c ctest.h
-	$(CC) -o $@ $< 
+	$(CC) $(CFLAGS) -o $@ $< 
 
 test/%: tests/%
 	./$<

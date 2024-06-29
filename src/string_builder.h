@@ -27,7 +27,10 @@ void sb_push_str_null(StringBuilder* sb, ...);
 void sb_push_sprintf(StringBuilder* sb, const char* restrict fmt, ...);
 
 // Pushes a sized string of certain length to a string builder 
-void sb_push_nstr(StringBuilder* self, const char* str, size_t len);
+#define sb_push_nstr(self, str, len) sb_push_bytes(self, str, len)
+
+// Pushes bytes of certain length to a string builder 
+void sb_push_bytes(StringBuilder* self, void* data, size_t sizeb);
 
 // Writes the contents of a string builder to a file handle
 #define sb_fwrite(sb, f) fwrite((sb)->items, 1, (sb)->count, f)
@@ -92,10 +95,10 @@ void sb_push_str_null(StringBuilder* sb, ...) {
     va_end(list);
 }
 
-void sb_push_nstr(StringBuilder* sb, const char* str, size_t len) {
-    sb_maybe_resize(sb, len);
-    memcpy(sb->items + sb->count, str, len);
-    sb->count += len;
+void sb_push_bytes(StringBuilder* self, void* data, size_t sizeb) {
+    sb_maybe_resize(self, sizeb);
+    memcpy(self->items + self->count, data, sizeb);
+    self->count += sizeb;
 }
 
 void sb_push_sprintf(StringBuilder* sb, const char* restrict fmt, ...) {
