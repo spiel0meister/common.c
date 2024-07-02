@@ -1,3 +1,4 @@
 main.c
 test
 .clangd
+tests/
