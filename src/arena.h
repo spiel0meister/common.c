@@ -1,11 +1,17 @@
 #ifndef ARENA_H
 #define ARENA_H
 #include <stdio.h>
+#include <stdint.h>
+
+#ifndef ARENA_ASSERT
+#include <assert.h>
+#define ARENA_ASSERT(expr) assert(expr)
+#endif // ARENA_ASSERT
 
 typedef struct {
-    char* mem;
     size_t size;
     size_t capacity;
+    uintptr_t* mem;
 }Arena;
 
 #define arena_alloc(arena, Type) (Type*)arena_allocb(arena, sizeof(Type))
@@ -13,6 +19,8 @@ typedef struct {
 
 #define arena_alloc_array(arena, n, Type) (Type*)arena_allocb(arena, sizeof(Type) * (n))
 #define arena_calloc_array(arena, n, Type) (Type*)arena_callocb(arena, sizeof(Type) * (n))
+
+#define arena_occupied(arena) (ARENA_ASSERT((arena) != NULL), (arena)->size*sizeof(uintptr_t))
 
 void arena_prealloc(Arena* arena, size_t capacity);
 
@@ -23,26 +31,34 @@ char* arena_strdup(Arena* arena, const char* cstr);
 char* arena_sprintf(Arena* arena, const char* restrict fmt, ...);
 
 void arena_reset(Arena* arena);
-void arena_free(Arena* arena);
+#define arena_reset(arena) (arena)->size = 0
 
 #endif // ARENA_H
 
 #ifdef ARENA_IMPLEMENTATION
 #include <stdlib.h>
+#include <stdarg.h>
 #include <string.h>
 
 void arena_prealloc(Arena* arena, size_t capacity) {
-    arena->mem = malloc(capacity);
+    size_t word_size = sizeof(uintptr_t);
+    size_t real_capacity = (capacity + word_size - 1)/word_size;
+
+    arena->mem = malloc(real_capacity * word_size);
     arena->size = 0;
-    arena->capacity = capacity;
+    arena->capacity = real_capacity;
 }
 
 void* arena_allocb(Arena* arena, size_t size) {
-    if (arena->size + size > arena->capacity) {
+    size_t word_size = sizeof(uintptr_t);
+    size_t real_size = (size + word_size - 1)/word_size;
+
+    if (arena->size + real_size > arena->capacity) {
         return NULL;
     }
+
     size_t i = arena->size;
-    arena->size += size;
+    arena->size += real_size;
     return arena->mem + i;
 }
 
@@ -81,10 +97,6 @@ char* arena_sprintf(Arena* restrict arena, const char* restrict fmt, ...) {
     va_end(args);
 
     return cstr;
-}
-
-void arena_reset(Arena* arena) {
-    arena->size = 0;
 }
 
 void arena_free(Arena* arena) {
