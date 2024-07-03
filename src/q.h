@@ -2,6 +2,11 @@
 #define QUEUE_H
 #include <stddef.h>
 
+#ifndef Q_ASSERT
+#include <assert.h>
+#define Q_ASSERT(expr) assert(expr)
+#endif // Q_ASSERT
+
 #define q_enqueue(queue, item) \
     __q_enqueue(queue, \
             (char*)&(queue)->items - (char*)(queue), \
@@ -18,7 +23,7 @@
     static_assert(sizeof((queue)->count) == sizeof(size_t), "count in queue must be size_t"); \
     static_assert(sizeof((queue)->capacity) == sizeof(size_t), "capacity in queue must be size_t")
 
-#define q_dequeue(queue) (queue)->items[--(queue)->count]
+#define q_dequeue(queue) (Q_ASSERT((queue)->count > 0), (queue)->items[--(queue)->count])
 
 void __q_enqueue(void* queue, size_t items_field_offset, size_t count_field_offset, size_t capacity_field_offset, void* item, size_t item_size);
 void __q_enqueue_many(void* queue, size_t items_field_offset, size_t count_field_offset, size_t capacity_field_offset, void* items, size_t item_count, size_t item_size);

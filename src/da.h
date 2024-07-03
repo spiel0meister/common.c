@@ -2,6 +2,11 @@
 #define DA_H
 #include <stddef.h>
 
+#ifndef DA_ASSERT
+#include <assert.h>
+#define DA_ASSERT(expr) assert(expr)
+#endif // DA_ASSERT
+
 #define DA(Type) Type* items; size_t count; size_t capacity
 
 #define da_append(da, item) \
@@ -23,9 +28,9 @@
 void __da_append(void* da, size_t items_field_offset, size_t count_field_offset, size_t capacity_field_offset, void* item, size_t item_size);
 void __da_append_many(void* da, size_t items_field_offset, size_t count_field_offset, size_t capacity_field_offset, void* items, size_t item_count, size_t item_size);
 
-#define da_at(da, i) (da)->items[i]
-#define da_first(da) da_at(da, 0)
-#define da_last(da) da_at(da, (da)->count - 1)
+#define da_at(da, i) (DA_ASSERT((da)->count > (i)), (da)->items[i])
+#define da_first(da) (DA_ASSERT((da)->count > 0), da_at(da, 0))
+#define da_last(da) (DA_ASSERT((da)->count > 0), da_at(da, (da)->count - 1))
 
 #define da_free(da) do { \
         free((da)->items); \
