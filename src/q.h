@@ -8,20 +8,16 @@
 #endif // Q_ASSERT
 
 #define q_enqueue(queue, item) \
-    __q_enqueue(queue, \
+    (Q_ASSERT(sizeof((queue)->count) == sizeof(size_t) && sizeof((queue)->capacity) == sizeof(size_t)), __q_enqueue(queue, \
             (char*)&(queue)->items - (char*)(queue), \
             (char*)&(queue)->count - (char*)(queue), \
-            (char*)&(queue)->capacity - (char*)(queue), item, sizeof(*(item))); \
-    static_assert(sizeof((queue)->count) == sizeof(size_t), "count in queue must be size_t"); \
-    static_assert(sizeof((queue)->capacity) == sizeof(size_t), "capacity in queue must be size_t")
+            (char*)&(queue)->capacity - (char*)(queue), item, sizeof(*(item)))) \
 
 #define q_enqueue_many(queue, items_, item_count) \
-    __q_enqueue_many(queue, \
+    (Q_ASSERT(sizeof((queue)->count) == sizeof(size_t) && sizeof((queue)->capacity) == sizeof(size_t)), __q_enqueue_many(queue, \
             (char*)&(queue)->items - (char*)(queue), \
             (char*)&(queue)->count - (char*)(queue), \
-            (char*)&(queue)->capacity - (char*)(queue), items_, item_count, sizeof((items_)[0])); \
-    static_assert(sizeof((queue)->count) == sizeof(size_t), "count in queue must be size_t"); \
-    static_assert(sizeof((queue)->capacity) == sizeof(size_t), "capacity in queue must be size_t")
+            (char*)&(queue)->capacity - (char*)(queue), items_, item_count, sizeof((items_)[0])))
 
 #define q_dequeue(queue) (Q_ASSERT((queue)->count > 0), (queue)->items[--(queue)->count])
 
@@ -31,6 +27,7 @@ void __q_enqueue_many(void* queue, size_t items_field_offset, size_t count_field
 #endif // QUEUE_H
 
 #ifdef QUEUE_IMPLEMENTATION
+#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 

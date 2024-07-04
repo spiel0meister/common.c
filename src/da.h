@@ -10,20 +10,16 @@
 #define DA(Type) Type* items; size_t count; size_t capacity
 
 #define da_append(da, item) \
-    __da_append(da, \
+    (DA_ASSERT(sizeof((da)->count) == sizeof(size_t) && sizeof((da)->capacity) == sizeof(size_t)), __da_append(da, \
             (char*)&(da)->items - (char*)(da), \
             (char*)&(da)->count - (char*)(da), \
-            (char*)&(da)->capacity - (char*)(da), item, sizeof(*(item))); \
-    static_assert(sizeof((da)->count) == sizeof(size_t), "count in da must be size_t"); \
-    static_assert(sizeof((da)->capacity) == sizeof(size_t), "capacity in da must be size_t")
+            (char*)&(da)->capacity - (char*)(da), item, sizeof(*(item))))
 
 #define da_append_many(da, items_, item_count) \
-    __da_append_many(da, \
+    (DA_ASSERT(sizeof((da)->count) == sizeof(size_t) && sizeof((da)->capacity) == sizeof(size_t)), __da_append_many(da, \
             (char*)&(da)->items - (char*)(da), \
             (char*)&(da)->count - (char*)(da), \
-            (char*)&(da)->capacity - (char*)(da), items_, item_count, sizeof(items_[0])); \
-    static_assert(sizeof((da)->count) == sizeof(size_t), "count in da must be size_t"); \
-    static_assert(sizeof((da)->capacity) == sizeof(size_t), "capacity in da must be size_t")
+            (char*)&(da)->capacity - (char*)(da), items_, item_count, sizeof(items_[0])))
 
 void __da_append(void* da, size_t items_field_offset, size_t count_field_offset, size_t capacity_field_offset, void* item, size_t item_size);
 void __da_append_many(void* da, size_t items_field_offset, size_t count_field_offset, size_t capacity_field_offset, void* items, size_t item_count, size_t item_size);
