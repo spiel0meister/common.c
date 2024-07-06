@@ -1,6 +1,7 @@
 #ifndef QUEUE_H
 #define QUEUE_H
 #include <stddef.h>
+#include <stdint.h>
 
 #ifndef Q_ASSERT
 #include <assert.h>
@@ -9,15 +10,15 @@
 
 #define q_enqueue(queue, item) \
     (Q_ASSERT(sizeof((queue)->count) == sizeof(size_t) && sizeof((queue)->capacity) == sizeof(size_t)), __q_enqueue(queue, \
-            (char*)&(queue)->items - (char*)(queue), \
-            (char*)&(queue)->count - (char*)(queue), \
-            (char*)&(queue)->capacity - (char*)(queue), item, sizeof(*(item)))) \
+            (uint8_t*)&(queue)->items - (uint8_t*)(queue), \
+            (uint8_t*)&(queue)->count - (uint8_t*)(queue), \
+            (uint8_t*)&(queue)->capacity - (uint8_t*)(queue), item, sizeof(*(item)))) \
 
 #define q_enqueue_many(queue, items_, item_count) \
     (Q_ASSERT(sizeof((queue)->count) == sizeof(size_t) && sizeof((queue)->capacity) == sizeof(size_t)), __q_enqueue_many(queue, \
-            (char*)&(queue)->items - (char*)(queue), \
-            (char*)&(queue)->count - (char*)(queue), \
-            (char*)&(queue)->capacity - (char*)(queue), items_, item_count, sizeof((items_)[0])))
+            (uint8_t*)&(queue)->items - (uint8_t*)(queue), \
+            (uint8_t*)&(queue)->count - (uint8_t*)(queue), \
+            (uint8_t*)&(queue)->capacity - (uint8_t*)(queue), items_, item_count, sizeof((items_)[0])))
 
 #define q_dequeue(queue) (Q_ASSERT((queue)->count > 0), (queue)->items[--(queue)->count])
 

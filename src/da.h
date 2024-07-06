@@ -1,6 +1,7 @@
 #ifndef DA_H
 #define DA_H
 #include <stddef.h>
+#include <stdint.h>
 
 #ifndef DA_ASSERT
 #include <assert.h>
@@ -11,15 +12,15 @@
 
 #define da_append(da, item) \
     (DA_ASSERT(sizeof((da)->count) == sizeof(size_t) && sizeof((da)->capacity) == sizeof(size_t)), __da_append(da, \
-            (char*)&(da)->items - (char*)(da), \
-            (char*)&(da)->count - (char*)(da), \
-            (char*)&(da)->capacity - (char*)(da), item, sizeof(*(item))))
+            (uint8_t*)&(da)->items - (uint8_t*)(da), \
+            (uint8_t*)&(da)->count - (uint8_t*)(da), \
+            (uint8_t*)&(da)->capacity - (uint8_t*)(da), item, sizeof(*(item))))
 
 #define da_append_many(da, items_, item_count) \
     (DA_ASSERT(sizeof((da)->count) == sizeof(size_t) && sizeof((da)->capacity) == sizeof(size_t)), __da_append_many(da, \
-            (char*)&(da)->items - (char*)(da), \
-            (char*)&(da)->count - (char*)(da), \
-            (char*)&(da)->capacity - (char*)(da), items_, item_count, sizeof(items_[0])))
+            (uint8_t*)&(da)->items - (uint8_t*)(da), \
+            (uint8_t*)&(da)->count - (uint8_t*)(da), \
+            (uint8_t*)&(da)->capacity - (uint8_t*)(da), items_, item_count, sizeof(items_[0])))
 
 void __da_append(void* da, size_t items_field_offset, size_t count_field_offset, size_t capacity_field_offset, void* item, size_t item_size);
 void __da_append_many(void* da, size_t items_field_offset, size_t count_field_offset, size_t capacity_field_offset, void* items, size_t item_count, size_t item_size);
@@ -27,6 +28,8 @@ void __da_append_many(void* da, size_t items_field_offset, size_t count_field_of
 #define da_at(da, i) (DA_ASSERT((da)->count > (i)), (da)->items[i])
 #define da_first(da) (DA_ASSERT((da)->count > 0), da_at(da, 0))
 #define da_last(da) (DA_ASSERT((da)->count > 0), da_at(da, (da)->count - 1))
+
+#define da_pop(da) (DA_ASSERT((da)->count > 0), da_at(da, --(da)->count))
 
 #define da_free(da) do { \
         free((da)->items); \
