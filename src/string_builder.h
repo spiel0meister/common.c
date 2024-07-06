@@ -24,6 +24,7 @@ void sb_push_str_null(StringBuilder* sb, ...);
 #define sb_push_str(sb, ...) sb_push_str_null(sb, __VA_ARGS__, NULL)
 
 // Pushes a formatted string to a string builder
+__attribute__((format(printf, 2, 3)))
 void sb_push_sprintf(StringBuilder* sb, const char* restrict fmt, ...);
 
 // Pushes a sized string of certain length to a string builder 
@@ -109,10 +110,10 @@ void sb_push_sprintf(StringBuilder* sb, const char* restrict fmt, ...) {
 
     va_start(args, fmt);
 
-    sb_maybe_resize(sb, n);
-    int n_ = vsnprintf(sb->items + sb->count, n, fmt, args);
-    assert(n_ == n);
-    sb->count += n_ - 1;
+    sb_maybe_resize(sb, n + 1);
+    int n_ = vsnprintf(sb->items + sb->count, n + 1, fmt, args);
+    assert(n == n_);
+    sb->count += n;
 
     va_end(args);
 }
