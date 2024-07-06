@@ -1,7 +1,8 @@
 #ifndef ARENA_H
 #define ARENA_H
-#include <stdio.h>
 #include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
 
 #ifndef ARENA_ASSERT
 #include <assert.h>
@@ -21,17 +22,21 @@ typedef struct {
 #define arena_calloc_array(arena, n, Type) (Type*)arena_callocb(arena, sizeof(Type) * (n))
 
 #define arena_occupied(arena) (ARENA_ASSERT((arena) != NULL), (arena)->size*sizeof(uintptr_t))
+#define arena_can_alloc(arena, Type) arena_can_allocb(arena, sizeof(Type))
 
-void arena_prealloc(Arena* arena, size_t capacity);
+Arena arena_new(size_t capacity);
+void arena_prealloc(Arena* self, size_t capacity);
+char* arena_strdup(Arena* self, const char* cstr);
+char* arena_sprintf(Arena* self, const char* restrict fmt, ...);
 
-void* arena_allocb(Arena* arena, size_t size);
-void* arena_callocb(Arena* arena, size_t size);
-void* arena_memdupb(Arena* arena, void* mem, size_t size);
-char* arena_strdup(Arena* arena, const char* cstr);
-char* arena_sprintf(Arena* arena, const char* restrict fmt, ...);
-
-void arena_reset(Arena* arena);
+void arena_free(Arena* self);
+void arena_reset(Arena* self);
 #define arena_reset(arena) (arena)->size = 0
+
+void* arena_allocb(Arena* self, size_t size);
+void* arena_callocb(Arena* self, size_t size);
+void* arena_memdupb(Arena* self, void* mem, size_t size);
+bool arena_can_allocb(Arena* self, size_t size);
 
 #endif // ARENA_H
 
@@ -40,70 +45,76 @@ void arena_reset(Arena* arena);
 #include <stdarg.h>
 #include <string.h>
 
-void arena_prealloc(Arena* arena, size_t capacity) {
+Arena arena_new(size_t capacity) {
+    Arena a = {0};
+    arena_prealloc(&a, capacity);
+    return a;
+}
+
+void arena_prealloc(Arena* self, size_t capacity) {
     size_t word_size = sizeof(uintptr_t);
     size_t real_capacity = (capacity + word_size - 1)/word_size;
 
-    arena->mem = malloc(real_capacity * word_size);
-    arena->size = 0;
-    arena->capacity = real_capacity;
+    self->mem = malloc(real_capacity * word_size);
+    self->size = 0;
+    self->capacity = real_capacity;
 }
 
-void* arena_allocb(Arena* arena, size_t size) {
+void* arena_allocb(Arena* self, size_t size) {
     size_t word_size = sizeof(uintptr_t);
     size_t real_size = (size + word_size - 1)/word_size;
 
-    if (arena->size + real_size > arena->capacity) {
+    if (self->size + real_size > self->capacity) {
         return NULL;
     }
 
-    size_t i = arena->size;
-    arena->size += real_size;
-    return arena->mem + i;
+    size_t i = self->size;
+    self->size += real_size;
+    return self->mem + i;
 }
 
-void* arena_callocb(Arena* arena, size_t size) {
-    void* p = arena_allocb(arena, size);
+void* arena_callocb(Arena* self, size_t size) {
+    void* p = arena_allocb(self, size);
     memset(p, 0, size);
     return p;
 }
 
-void* arena_memdupb(Arena* arena, void* mem, size_t size) {
-    void* dup = arena_allocb(arena, size);
+void* arena_memdupb(Arena* self, void* mem, size_t size) {
+    void* dup = arena_allocb(self, size);
     if (dup == NULL) return NULL;
 
     memcpy(dup, mem, size);
     return dup;
 }
 
-char* arena_strdup(Arena* arena, const char* cstr) {
+char* arena_strdup(Arena* self, const char* cstr) {
     size_t size = strlen(cstr);
-    char* dup = arena_alloc_array(arena, size, char);
+    char* dup = arena_alloc_array(self, size, char);
     if (dup == NULL) return NULL;
 
     memcpy(dup, cstr, size);
     return dup;
 }
 
-char* arena_sprintf(Arena* restrict arena, const char* restrict fmt, ...) {
+char* arena_sprintf(Arena* restrict self, const char* restrict fmt, ...) {
     va_list args;
     va_start(args, fmt);
     int n = vsnprintf(NULL, 0, fmt, args);
     va_end(args);
 
     va_start(args, fmt);
-    char* cstr = arena_alloc_array(arena, n + 1, char);
+    char* cstr = arena_alloc_array(self, n + 1, char);
     vsnprintf(cstr, n + 1, fmt, args);
     va_end(args);
 
     return cstr;
 }
 
-void arena_free(Arena* arena) {
-    free(arena->mem);
-    arena->mem = NULL;
-    arena->size = 0;
-    arena->capacity = 0;
+void arena_free(Arena* self) {
+    free(self->mem);
+    self->mem = NULL;
+    self->size = 0;
+    self->capacity = 0;
 }
 #endif // ARENA_IMPLEMENTATION
 
