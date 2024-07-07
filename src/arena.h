@@ -110,6 +110,12 @@ char* arena_sprintf(Arena* restrict self, const char* restrict fmt, ...) {
     return cstr;
 }
 
+bool arena_can_allocb(Arena* a, size_t size) {
+    size_t word_size = sizeof(uintptr_t);
+    size_t real_size = (size + word_size - 1)/word_size;
+    return a->size + real_size < a->capacity;
+}
+
 void arena_free(Arena* self) {
     free(self->mem);
     self->mem = NULL;
