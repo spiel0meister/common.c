@@ -62,6 +62,7 @@ void sb_free(StringBuilder* sb);
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <errno.h>
 
 void sb_maybe_resize(StringBuilder* sb, size_t to_append_len) {
     if (sb->count + to_append_len >= sb->capacity) {
@@ -120,7 +121,10 @@ void sb_push_sprintf(StringBuilder* sb, const char* restrict fmt, ...) {
 
 bool sb_read_file(StringBuilder* sb, const char* filepath) {
     FILE* f = fopen(filepath, "rb");
-    if (f == NULL) return false;
+    if (f == NULL) {
+        fprintf(stderr, "Couldn't open %s: %s\n", filepath, strerror(errno));
+        return false;
+    }
 
     fseek(f, 0, SEEK_END);
     size_t n = ftell(f);
@@ -137,7 +141,10 @@ bool sb_read_file(StringBuilder* sb, const char* filepath) {
 
 bool sb_write_file(StringBuilder* self, const char* filepath) {
     FILE* f = fopen(filepath, "wb");
-    if (f == NULL) return false;
+    if (f == NULL) {
+        fprintf(stderr, "Couldn't open %s: %s\n", filepath, strerror(errno));
+        return false;
+    }
 
     int n = sb_fwrite(self, f);
     assert(n == (int)self->count);
