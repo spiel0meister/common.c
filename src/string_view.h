@@ -21,8 +21,8 @@ typedef struct {
 }StringSplit;
 
 // Creates a StringView from a C string
-StringView sv_from_cstr(const char* str);
 StringView sv_from_parts(const char* start, size_t len);
+#define sv_from_cstr(str) sv_from_parts(str, strlen(str))
 
 StringView sv_chop_by_c(StringView* sv, char delim);
 StringView sv_trim_left(StringView sv);
@@ -59,10 +59,6 @@ static void split_maybe_resize(StringSplit* split) {
 static void split_append(StringSplit* split, StringView sv) {
     split_maybe_resize(split);
     split->items[split->count++] = sv;
-}
-
-StringView sv_from_cstr(const char* str) {
-    return (StringView) { .start = str, .len = strlen(str) };
 }
 
 StringView sv_from_parts(const char* start, size_t len) {
