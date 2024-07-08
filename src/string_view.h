@@ -7,7 +7,7 @@
 #define SV_FMT "%.*s"
 #define SV_F(sv) (int)(sv).len, (sv).start
 
-typedef bool (*predicate_t)(char c);
+typedef bool (*sv_predicate_t)(char c);
 
 typedef struct {
     const char* start;
@@ -29,13 +29,13 @@ StringView sv_trim_left(StringView sv);
 StringView sv_trim_right(StringView sv);
 StringView sv_trim(StringView sv);
 
-StringView sv_chop_by_pred(StringView* sv, predicate_t pred);
-StringView sv_trim_left_pred(StringView sv, predicate_t pred);
-StringView sv_trim_right_pred(StringView sv, predicate_t pred);
-StringView sv_trim_pred(StringView sv, predicate_t pred);
+StringView sv_chop_by_pred(StringView* sv, sv_predicate_t pred);
+StringView sv_trim_left_pred(StringView sv, sv_predicate_t pred);
+StringView sv_trim_right_pred(StringView sv, sv_predicate_t pred);
+StringView sv_trim_pred(StringView sv, sv_predicate_t pred);
 
 StringSplit sv_split(StringView sv, char c);
-StringSplit sv_split_pred(StringView sv, predicate_t pred);
+StringSplit sv_split_pred(StringView sv, sv_predicate_t pred);
 
 bool sv_cmpc(StringView sv, const char* cstr);
 bool sv_cmpsv(StringView sv, StringView that);
