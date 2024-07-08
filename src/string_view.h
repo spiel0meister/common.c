@@ -40,6 +40,9 @@ StringSplit sv_split_pred(StringView sv, predicate_t pred);
 bool sv_cmpc(StringView sv, const char* cstr);
 bool sv_cmpsv(StringView sv, StringView that);
 
+char* sv_to_cstr(StringView sv);
+char* sv_to_cstr_inplace(StringView sv, char buf[sv.len + 1]);
+
 #endif // STIRNG_VIEW
 
 #ifdef SV_IMPLEMENTATION
@@ -47,6 +50,10 @@ bool sv_cmpsv(StringView sv, StringView that);
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+
+#ifndef SV_MALLOC
+#define SV_MALLOC malloc
+#endif // SV_MALLOC
 
 static void split_maybe_resize(StringSplit* split) {
     if (split->count == split->capacity) {
@@ -198,5 +205,19 @@ bool sv_cmpsv(StringView sv, StringView that) {
 
     return true;
 }
+
+char* sv_to_cstr(StringView sv) {
+    char* buf = SV_MALLOC(sv.len + 1);
+    memcpy(buf, sv.start, sv.len);
+    buf[sv.len] = 0;
+    return buf;
+}
+
+char* sv_to_cstr_inplace(StringView sv, char buf[sv.len + 1]) {
+    memcpy(buf, sv.start, sv.len);
+    buf[sv.len] = 0;
+    return buf;
+}
+
 
 #endif // STRING_VIEW_IMPLEMENTATION
