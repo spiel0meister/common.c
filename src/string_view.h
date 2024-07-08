@@ -129,7 +129,7 @@ StringSplit sv_split(StringView sv, char c) {
     return split;
 }
 
-StringView sv_chop_by_pred(StringView* sv, predicate_t pred) {
+StringView sv_chop_by_pred(StringView* sv, sv_predicate_t pred) {
     StringView out = { NULL, 0 };
 
     for (size_t i = 0; i < sv->len; ++i) {
@@ -157,7 +157,7 @@ StringView sv_chop_by_pred(StringView* sv, predicate_t pred) {
     return out;
 }
 
-StringView sv_trim_left_pred(StringView sv, predicate_t pred) {
+StringView sv_trim_left_pred(StringView sv, sv_predicate_t pred) {
     while (pred(sv.start[0])) {
         ++sv.start;
         --sv.len;
@@ -166,7 +166,7 @@ StringView sv_trim_left_pred(StringView sv, predicate_t pred) {
     return sv;
 }
 
-StringView sv_trim_right_pred(StringView sv, predicate_t pred) {
+StringView sv_trim_right_pred(StringView sv, sv_predicate_t pred) {
     while (pred(sv.start[sv.len - 1])) {
         --sv.len;
     }
@@ -174,11 +174,11 @@ StringView sv_trim_right_pred(StringView sv, predicate_t pred) {
     return sv;
 }
 
-StringView sv_trim_pred(StringView sv, predicate_t pred) {
+StringView sv_trim_pred(StringView sv, sv_predicate_t pred) {
     return sv_trim_left_pred(sv_trim_right_pred(sv, pred), pred);
 }
 
-StringSplit sv_split_pred(StringView sv, predicate_t pred) {
+StringSplit sv_split_pred(StringView sv, sv_predicate_t pred) {
     StringSplit split = {};   
     while (sv.len > 0) {
         split_append(&split, sv_chop_by_pred(&sv, pred));
