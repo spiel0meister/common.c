@@ -3,6 +3,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#ifndef DA_SORT
+#include <stdlib.h>
+#define DA_SORT qsort
+#endif
+
 #ifndef DA_ASSERT
 #include <assert.h>
 #define DA_ASSERT(expr) assert(expr)
@@ -30,6 +35,7 @@ void __da_append_many(void* da, size_t items_field_offset, size_t count_field_of
 #define da_last(da) (DA_ASSERT((da)->count > 0), da_at(da, (da)->count - 1))
 
 #define da_pop(da) (DA_ASSERT((da)->count > 0), da_at(da, --(da)->count))
+#define da_sort(da, compare_fn) DA_SORT((da)->items, (da)->count, sizeof((da)->items[0]), compare_fn)
 
 #define da_free(da) do { \
         free((da)->items); \
