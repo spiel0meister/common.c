@@ -1,5 +1,5 @@
-#ifndef LOG_H
-#define LOG_H
+#ifndef LOG_H_
+#define LOG_H_
 #include <stdio.h>
 
 typedef enum {
@@ -19,7 +19,7 @@ void log_log(LogLevel level, const char* fmt, ...);
 void log_set_file(FILE* f);
 void log_set_level(LogLevel level);
 
-#endif // LOG_H
+#endif // LOG_H_
 
 #ifdef LOG_IMPLEMENTATION
 #include <stdarg.h>

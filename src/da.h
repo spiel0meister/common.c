@@ -1,5 +1,5 @@
-#ifndef DA_H
-#define DA_H
+#ifndef DA_H_
+#define DA_H_
 #include <stddef.h>
 #include <stdint.h>
 
@@ -46,7 +46,7 @@ void __da_append_many(void* da, size_t items_field_offset, size_t count_field_of
 
 #define da_foreach(da, Type, ptr) for (Type* ptr = (da)->items; ptr != (da)->items + (da)->count; ptr++)
 
-#endif // DA_H
+#endif // DA_H_
 
 #ifdef DA_IMPLEMENTATION
 #include <stdlib.h>

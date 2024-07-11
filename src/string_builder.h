@@ -1,5 +1,5 @@
-#ifndef STRING_BUILDER_H
-#define STRING_BUILDER_H
+#ifndef STRING_BUILDER_H_
+#define STRING_BUILDER_H_
 #include <stddef.h>
 #include <stdbool.h>
 
@@ -50,7 +50,7 @@ void sb_export_inplace(StringBuilder const* sb, char dst[sb->count]);
 // Frees a string builder
 void sb_free(StringBuilder* sb);
 
-#endif // STRING_BUILDER_H
+#endif // STRING_BUILDER_H_
 
 #ifdef SB_IMPLEMENTATION
 #ifndef SB_MALLOC

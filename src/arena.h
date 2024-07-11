@@ -1,5 +1,5 @@
-#ifndef ARENA_H
-#define ARENA_H
+#ifndef ARENA_H_
+#define ARENA_H_
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
@@ -38,7 +38,7 @@ void* arena_callocb(Arena* self, size_t size);
 void* arena_memdupb(Arena* self, void* mem, size_t size);
 bool arena_can_allocb(Arena* self, size_t size);
 
-#endif // ARENA_H
+#endif // ARENA_H_
 
 #ifdef ARENA_IMPLEMENTATION
 #include <stdlib.h>

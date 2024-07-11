@@ -1,5 +1,5 @@
-#ifndef PERF_H
-#define PERF_H
+#ifndef PERF_H_
+#define PERF_H_
 #include <time.h>
 
 typedef struct timespec Timespec;
@@ -8,7 +8,7 @@ void perf_timestamp(Timespec* ts);
 long perf_diff_nanoseconds(Timespec* start);
 double perf_diff_seconds(Timespec* start);
 
-#endif // PERF_H
+#endif // PERF_H_
 
 #ifdef PERF_IMPLEMENTATION
 void perf_timestamp(Timespec* ts) {

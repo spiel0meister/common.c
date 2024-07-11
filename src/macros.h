@@ -1,5 +1,5 @@
-#ifndef MACROS_H
-#define MACROS_H
+#ifndef MACROS_H_
+#define MACROS_H_
 
 #ifndef MACROS_ABORT
 #include <stdlib.h>
@@ -17,4 +17,4 @@
 
 #define UNREACHABLE() PANIC("%s:%d: UNREACHABLE\n", __FILE__, __LINE__)
 
-#endif // MACROS_H
+#endif // MACROS_H_

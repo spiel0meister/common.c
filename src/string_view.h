@@ -1,5 +1,5 @@
-#ifndef STIRNG_VIEW
-#define STIRNG_VIEW
+#ifndef STRING_VIEW_H_
+#define STRING_VIEW_H_
 
 #include <stddef.h>
 #include <stdbool.h>
@@ -43,7 +43,7 @@ bool sv_cmpsv(StringView sv, StringView that);
 char* sv_to_cstr(StringView sv);
 char* sv_to_cstr_inplace(StringView sv, char buf[sv.len + 1]);
 
-#endif // STIRNG_VIEW
+#endif // STRING_VIEW_H_
 
 #ifdef SV_IMPLEMENTATION
 #include <assert.h>

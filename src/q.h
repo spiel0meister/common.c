@@ -1,5 +1,5 @@
-#ifndef QUEUE_H
-#define QUEUE_H
+#ifndef QUEUE_H_
+#define QUEUE_H_
 #include <stddef.h>
 #include <stdint.h>
 
@@ -25,7 +25,7 @@
 void __q_enqueue(void* queue, size_t items_field_offset, size_t count_field_offset, size_t capacity_field_offset, void* item, size_t item_size);
 void __q_enqueue_many(void* queue, size_t items_field_offset, size_t count_field_offset, size_t capacity_field_offset, void* items, size_t item_count, size_t item_size);
 
-#endif // QUEUE_H
+#endif // QUEUE_H_
 
 #ifdef QUEUE_IMPLEMENTATION
 #include <stdlib.h>
