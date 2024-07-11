@@ -10,4 +10,5 @@ Contains the following:
 - [log.h](./src/log.h): Logging
 - [cperf.h](./src/cperf.h): "Benchmarking" C Code
 - [string_view.h](./src/string_view.h): Simple string view
-- [macros.h](./src/macros.h): Simple string view
+- [macros.h](./src/macros.h): QOL Macros
+- [str.h](./src/str.h): Sized String
