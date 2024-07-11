@@ -17,4 +17,6 @@
 
 #define UNREACHABLE() PANIC("%s:%d: UNREACHABLE\n", __FILE__, __LINE__)
 
+#define ARRAY_LEN(arr) (sizeof(arr)/sizeof((arr)[0]))
+
 #endif // MACROS_H_
