@@ -12,18 +12,17 @@
 #define STRING_FREE free
 #endif // STRING_FREE
 
-struct string_s {
+typedef struct {
     size_t len;
     char chars[];
-};
-typedef struct string_s* string;
+}string;
 
 #define STR_FMT "%.*s"
 #define STR_F(str) (int)(str)->len, (str)->chars
 
-string string_from_cstr(const char* str);
-string string_with_len(size_t len);
-string stringf(const char* fmt, ...);
+string* string_from_cstr(const char* str);
+string* string_with_len(size_t len);
+string* stringf(const char* fmt, ...);
 
 #define string_free STRING_FREE
 
@@ -33,29 +32,29 @@ string stringf(const char* fmt, ...);
 #include <string.h>
 #include <assert.h>
 
-string string_with_len(size_t len) {
-    string out = STRING_MALLOC(sizeof(out->len) + sizeof(out->chars[0]) * len);
+string* string_with_len(size_t len) {
+    string* out = STRING_MALLOC(sizeof(out->len) + sizeof(out->chars[0]) * len);
     assert(out != NULL);
     out->len = len;
     return out;
 }
 
-string string_from_cstr(const char* str) {
+string* string_from_cstr(const char* str) {
     size_t len = strlen(str);
-    string out = string_with_len(len);
+    string* out = string_with_len(len);
     if (out != NULL) {
         memcpy(out->chars, str, sizeof(out->chars[0]) * len);
     }
     return out;
 }
 
-string stringf(const char* fmt, ...) {
+string* stringf(const char* fmt, ...) {
     va_list args;
     va_start(args, fmt);
     int n = vsnprintf(NULL, 0, fmt, args);
     va_end(args);
 
-    string out = string_with_len(n - 1);
+    string* out = string_with_len(n - 1);
 
     va_start(args, fmt);
     int n_ = vsnprintf(out->chars, n, fmt, args);
