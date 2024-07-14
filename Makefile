@@ -13,3 +13,6 @@ tests/%: tests/%.c ctest.h
 
 test/%: tests/%
 	./$<
+
+%/:
+	mkdir -p $@
