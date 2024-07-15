@@ -30,11 +30,10 @@
 void __da_append(void* da, size_t items_field_offset, size_t count_field_offset, size_t capacity_field_offset, void* item, size_t item_size);
 void __da_append_many(void* da, size_t items_field_offset, size_t count_field_offset, size_t capacity_field_offset, void* items, size_t item_count, size_t item_size);
 
-#define da_at(da, i) (DA_ASSERT((da)->count > (i)), (da)->items[i])
 #define da_first(da) (DA_ASSERT((da)->count > 0), da_at(da, 0))
 #define da_last(da) (DA_ASSERT((da)->count > 0), da_at(da, (da)->count - 1))
 
-#define da_pop(da) (DA_ASSERT((da)->count > 0), da_at(da, --(da)->count))
+#define da_pop(da) (DA_ASSERT((da)->count > 0), (da)->items[--(da)->count])
 #define da_sort(da, compare_fn) DA_SORT((da)->items, (da)->count, sizeof((da)->items[0]), compare_fn)
 
 #define da_free(da) do { \
@@ -44,7 +43,7 @@ void __da_append_many(void* da, size_t items_field_offset, size_t count_field_of
         (da)->capacity = 0; \
     } while (0)
 
-#define da_foreach(da, Type, ptr) for (Type* ptr = (da)->items; ptr != (da)->items + (da)->count; ptr++)
+#define da_foreach(da, Type, ptr) for (Type* ptr = (da)->items; ptr < (da)->items + (da)->count; ptr++)
 
 #endif // DA_H_
 
