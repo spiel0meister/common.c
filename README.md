@@ -13,3 +13,5 @@ Contains the following:
 - [macros.h](./src/macros.h): QOL Macros
 - [utils.h](./src/utils.h): Things with no category
 - [str.h](./src/str.h): Sized String
+- [option.h](./src/option.h): Rust like Option type
+- [result.h](./src/result.h): Rust like Result type
