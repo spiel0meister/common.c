@@ -37,6 +37,10 @@
             (uint8_t*)&(da)->count - (uint8_t*)(da), \
             (uint8_t*)&(da)->capacity - (uint8_t*)(da), items_, item_count, sizeof(items_[0])))
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 void __da_with_cap(void* da, size_t items_field_offset, size_t capacity_field_offset, DA_SIZE_TYPE init_cap, size_t item_size);
 void __da_with_cap2(void* da, size_t items_field_offset, size_t capacity_field_offset, DA_SIZE_TYPE init_cap, size_t item_size);
 void __da_append(void* da, size_t items_field_offset, size_t count_field_offset, size_t capacity_field_offset, void* item, size_t item_size);
@@ -56,6 +60,10 @@ void __da_append_many(void* da, size_t items_field_offset, size_t count_field_of
     } while (0)
 
 #define da_foreach(da, Type, ptr) for (Type* ptr = (da)->items; ptr < (da)->items + (da)->count; ptr++)
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus
 
 #endif // DA_H_
 

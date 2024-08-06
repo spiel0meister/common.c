@@ -9,6 +9,10 @@
 #define ARENA_ASSERT(expr) assert(expr)
 #endif // ARENA_ASSERT
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 typedef struct {
     size_t size;
     size_t capacity;
@@ -37,6 +41,10 @@ void* arena_allocb(Arena* self, size_t size);
 void* arena_callocb(Arena* self, size_t size);
 void* arena_memdupb(Arena* self, void* mem, size_t size);
 bool arena_can_allocb(Arena* self, size_t size);
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus
 
 #endif // ARENA_H_
 

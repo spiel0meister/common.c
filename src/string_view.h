@@ -7,6 +7,10 @@
 #define SV_FMT "%.*s"
 #define SV_F(sv) (int)(sv).len, (sv).start
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 typedef bool (*sv_predicate_t)(char c);
 
 typedef struct {
@@ -42,6 +46,10 @@ bool sv_cmpsv(StringView sv, StringView that);
 
 char* sv_to_cstr(StringView sv);
 char* sv_to_cstr_inplace(StringView sv, char buf[sv.len + 1]);
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus
 
 #endif // STRING_VIEW_H_
 

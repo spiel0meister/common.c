@@ -2,11 +2,19 @@
 #define PERF_H_
 #include <time.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 typedef struct timespec Timespec;
 
 void perf_timestamp(Timespec* ts);
 long perf_diff_nanoseconds(Timespec* start);
 double perf_diff_seconds(Timespec* start);
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus
 
 #endif // PERF_H_
 

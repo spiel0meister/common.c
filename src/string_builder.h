@@ -7,6 +7,10 @@
 #define SB_INIT_CAP 8
 #endif // SB_INIT_CAP
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 typedef struct {
     char* items;
     size_t count;
@@ -49,6 +53,10 @@ void sb_export_inplace(StringBuilder const* sb, char dst[sb->count]);
 
 // Frees a string builder
 void sb_free(StringBuilder* sb);
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus
 
 #endif // STRING_BUILDER_H_
 
