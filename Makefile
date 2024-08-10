@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-Wall -Wextra -ggdb -I./src/
 
-MODS=arena cperf da log string_builder string_view q
+MODS=arena cperf da log string_builder string_view subprocess
 test: main.c $(foreach mod, $(MODS), src/$(mod).h)
 	gcc $(CFLAGS) -o $@ $<
 
