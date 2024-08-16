@@ -16,6 +16,10 @@ bool subprocess_run(const char* file, char* const* argv, size_t argv_count);
 
 pid_t subprocess_create(const char* file, char* const* argv, size_t argv_count);
 Process subprocess_create_ex(const char* file, char* const* argv, size_t argv_count);
+bool subprocess_wait(pid_t pid);
+bool subprocess_wait_ex(Process* proc);
+bool subprocess_kill(pid_t pid, int sig);
+bool subprocess_kill_ex(Process* proc, int sig);
 
 #endif // SUBPROCESS_H_
 
@@ -32,30 +36,7 @@ Process subprocess_create_ex(const char* file, char* const* argv, size_t argv_co
 bool subprocess_run(const char* file, char* const* argv, size_t argv_count) {
     pid_t pid = subprocess_create(file, argv, argv_count);
 
-    for (;;) {
-        int pid_status = 0;
-        if (waitpid(pid, &pid_status, 0) < 0) {
-            fprintf(stderr, "Waitpid failed on %d: %s\n", pid, strerror(errno));
-            return false;
-        }
-
-        if (WIFEXITED(pid_status)) {
-            int exit_status = WEXITSTATUS(pid_status);
-            if (exit_status) {
-                fprintf(stderr, "Command exited with exit code %d", exit_status);
-                return false;
-            }
-
-            break;
-        }
-
-        if (WIFSIGNALED(pid_status)) {
-            fprintf(stderr, "Command process was terminated by %s", strsignal(WTERMSIG(pid_status)));
-            return false;
-        }
-    }
-
-    return true;
+    return subprocess_wait(pid);
 }
 
 pid_t subprocess_create(const char* file, char* const* argv, size_t argv_count) {
@@ -118,6 +99,79 @@ Process subprocess_create_ex(const char* file, char* const* argv, size_t argv_co
     free(argv_copy);
 
     return proc;
+}
+
+bool subprocess_wait(pid_t pid) {
+    for (;;) {
+        int pid_status = 0;
+        if (waitpid(pid, &pid_status, 0) < 0) {
+            fprintf(stderr, "Waitpid failed on %d: %s\n", pid, strerror(errno));
+            return false;
+        }
+
+        if (WIFEXITED(pid_status)) {
+            int exit_status = WEXITSTATUS(pid_status);
+            if (exit_status) {
+                fprintf(stderr, "Command exited with exit code %d", exit_status);
+                return false;
+            }
+
+            break;
+        }
+
+        if (WIFSIGNALED(pid_status)) {
+            fprintf(stderr, "Command process was terminated by %s", strsignal(WTERMSIG(pid_status)));
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool subprocess_wait_ex(Process* proc) {
+    return subprocess_wait(proc->pid);
+}
+
+bool subprocess_kill(pid_t pid, int sig) {
+    if (kill(pid, sig) < 0) {
+        fprintf(stderr, "Couldn't send %d to process %d: %s\n", sig, pid, strerror(errno));
+        return false;
+    }
+
+    return true;
+}
+
+bool subprocess_kill_ex(Process* proc, int sig) {
+    if (kill(proc->pid, sig) < 0) {
+        fprintf(stderr, "Couldn't send %d to process %d: %s\n", sig, proc->pid, strerror(errno));
+        return false;
+    }
+
+    return true;
+}
+
+bool subprocess_close(Process* proc) {
+    if (close(proc->in_pipe[0]) < 0) {
+        fprintf(stderr, "Couldn't close pipe: %s\n", strerror(errno));
+        return false;
+    }
+
+    if (close(proc->in_pipe[1]) < 0) {
+        fprintf(stderr, "Couldn't close pipe: %s\n", strerror(errno));
+        return false;
+    }
+
+    if (close(proc->out_pipe[0]) < 0) {
+        fprintf(stderr, "Couldn't close pipe: %s\n", strerror(errno));
+        return false;
+    }
+
+    if (close(proc->out_pipe[1]) < 0) {
+        fprintf(stderr, "Couldn't close pipe: %s\n", strerror(errno));
+        return false;
+    }
+
+    return true;
 }
 
 #endif // SUBPROCESS_IMPLEMENTATION
