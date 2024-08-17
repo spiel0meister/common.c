@@ -25,11 +25,13 @@ typedef struct {
 
 IPv4Addr ipv4_from_cstr(const char* cstr);
 
+bool netsocket_socket(Net* netsock, int domain, int type, int protocol);
 bool netsocket_bind(Net* netsock, IPv4Addr addr, uint16_t port);
+bool netsocket_connect(Net* netsock, IPv4Addr addr, uint16_t port);
 bool netsocket_listen(Net* netsock, int n);
 bool netsocket_accept(Net* netsock, Net* netconn);
 bool netsocket_recv(Net* netconn, char* buf, size_t maxlen, int* n, int flags);
-bool netsocket_send(Net* conn, char* buf, size_t len, int flags);
+bool netsocket_send(Net* conn, void* buf, size_t len, int flags);
 bool netsocket_close(Net* netsock);
 
 #endif // NETSOCK_H_
@@ -70,14 +72,21 @@ IPv4Addr ipv4_from_cstr(const char* cstr) {
     };
 }
 
-bool netsocket_bind(Net* netsock, IPv4Addr addr, uint16_t port) {
-    netsock->addr = addr;
+bool netsocket_socket(Net* netsock, int domain, int type, int protocol) {
+    netsock->socket = socket(domain, type, protocol);
 
-    netsock->socket = socket(AF_INET, SOCK_STREAM, 0);
     if (netsock->socket < 0) {
         fprintf(stderr, "Couldn't create socket: %s\n", strerror(errno));
         return false;
     }
+
+    return true;
+}
+
+bool netsocket_bind(Net* netsock, IPv4Addr addr, uint16_t port) {
+    netsock->addr = addr;
+
+    if (!netsocket_socket(netsock, AF_INET, SOCK_STREAM, 0)) return false;
 
     struct sockaddr_in addr_in = {0};
     addr_in.sin_addr.s_addr = htonl(netsock->addr.as_int);
@@ -88,6 +97,24 @@ bool netsocket_bind(Net* netsock, IPv4Addr addr, uint16_t port) {
 
     if (bind(netsock->socket, (void*)&addr_in, len) < 0) {
         fprintf(stderr, "Couldn't bind socket: %s\n", strerror(errno));
+        return false;
+    }
+
+    return true;
+}
+
+bool netsocket_connect(Net* netsock, IPv4Addr addr, uint16_t port) {
+    netsock->addr = addr;
+    netsock->port = port;
+
+    struct sockaddr_in addr_in = {0};
+    addr_in.sin_addr.s_addr = htonl(addr.as_int);
+    addr_in.sin_port = htons(port);
+    addr_in.sin_family = AF_INET;
+    socklen_t len = sizeof(addr_in);
+
+    if (connect(netsock->socket, (void*)&addr_in, len) < 0) {
+        fprintf(stderr, "Couldn't connect on socket: %s\n", strerror(errno));
         return false;
     }
 
@@ -129,7 +156,7 @@ bool netsocket_recv(Net* netconn, char* buf, size_t maxlen, int* n, int flags) {
     return true;
 }
 
-bool netsocket_send(Net* conn, char* buf, size_t len, int flags) {
+bool netsocket_send(Net* conn, void* buf, size_t len, int flags) {
     if (send(conn->socket, buf, len, flags) < 0) {
         fprintf(stderr, "Couldn't send on socket: %s\n", strerror(errno));
         return false;
