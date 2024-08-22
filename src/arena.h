@@ -32,6 +32,9 @@ Arena arena_new(size_t capacity);
 void arena_prealloc(Arena* self, size_t capacity);
 char* arena_strdup(Arena* self, const char* cstr);
 char* arena_sprintf(Arena* self, const char* restrict fmt, ...);
+size_t arena_get_offset(Arena* self, void* thing);
+void* arena_exportb(Arena* self, size_t offset, size_t size);
+#define arena_export(arena, offset, Type) (Type*)arena_exportb(arena, offset, sizeof(Type))
 
 void arena_free(Arena* self);
 void arena_reset(Arena* self);
@@ -51,6 +54,7 @@ bool arena_can_allocb(Arena* self, size_t size);
 #ifdef ARENA_IMPLEMENTATION
 #include <stdlib.h>
 #include <stdarg.h>
+#include <stdio.h>
 #include <string.h>
 
 Arena arena_new(size_t capacity) {
@@ -117,6 +121,19 @@ char* arena_sprintf(Arena* restrict self, const char* restrict fmt, ...) {
 
     return cstr;
 }
+
+size_t arena_get_offset(Arena* self, void* thing) {
+    assert((void*)self->mem <= thing && thing < (void*)self->mem + self->capacity);
+
+    return thing - (void*)self->mem;
+}
+
+void* arena_exportb(Arena* self, size_t offset, size_t size) {
+    void* mem = malloc(size);
+    memcpy(mem, self->mem + offset, size);
+    return mem;
+}
+
 
 bool arena_can_allocb(Arena* a, size_t size) {
     size_t word_size = sizeof(uintptr_t);
