@@ -5,6 +5,7 @@
 #include <dlfcn.h>
 
 bool dynlib_load(void** handle, const char* path, int mode);
+bool dynsym_load(void** sym, void* handle, const char* name);
 
 #endif // UTILS_H_
 
@@ -17,6 +18,16 @@ bool dynlib_load(void** handle, const char* path, int mode) {
 
     *handle = dlopen(path, mode);
     if (*handle == NULL) {
+        fprintf(stderr, "%s: %s\n", __func__, dlerror());
+        return false;
+    }
+
+    return true;
+}
+
+bool dynsym_load(void** sym, void* handle, const char* name) {
+    *sym = dlsym(handle, name);
+    if (*sym == NULL) {
         fprintf(stderr, "%s: %s\n", __func__, dlerror());
         return false;
     }
