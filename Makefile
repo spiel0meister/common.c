@@ -1,18 +1,17 @@
 CC=gcc
 CFLAGS=-Wall -Wextra -ggdb -I./src/
 
+CPP=g++ -std=c++17
+CPPFLAGS=-Wall -Wextra -ggdb -I./src/
+
+all: testc testcpp
+
 MODS=arena cperf da log string_builder string_view subprocess
-test: main.c $(foreach mod, $(MODS), src/$(mod).h)
-	gcc $(CFLAGS) -o $@ $<
+testc: main.c $(foreach mod, $(MODS), src/$(mod).h)
+	$(CC) $(CFLAGS) -o $@ $<
 
-TESTS=arena string_builder
-tests: $(foreach test, $(TESTS), tests/$(test) test/$(test))
-
-tests/%: tests/%.c ctest.h
-	$(CC) $(CFLAGS) -o $@ $< 
-
-test/%: tests/%
-	./$<
+testcpp: main.cpp $(foreach mod, $(MODS), src/$(mod).h)
+	$(CPP) $(CPPFLAGS) -o $@ $<
 
 %/:
 	mkdir -p $@

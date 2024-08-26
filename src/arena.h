@@ -9,6 +9,14 @@
 #define ARENA_ASSERT(expr) assert(expr)
 #endif // ARENA_ASSERT
 
+#ifndef cast
+#ifdef __cplusplus
+#define cast(Type, thing) reinterpret_cast<Type>(thing)
+#else // __cplusplus
+#define cast(Type, thing) (Type)(thing)
+#endif // __cplusplus
+#endif // cast
+
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
@@ -31,7 +39,7 @@ typedef struct {
 Arena arena_new(size_t capacity);
 void arena_prealloc(Arena* self, size_t capacity);
 char* arena_strdup(Arena* self, const char* cstr);
-char* arena_sprintf(Arena* self, const char* restrict fmt, ...);
+char* arena_sprintf(Arena* self, const char* fmt, ...);
 size_t arena_get_offset(Arena* self, void* thing);
 void* arena_exportb(Arena* self, size_t offset, size_t size);
 #define arena_export(arena, offset, Type) (Type*)arena_exportb(arena, offset, sizeof(Type))
@@ -67,7 +75,7 @@ void arena_prealloc(Arena* self, size_t capacity) {
     size_t word_size = sizeof(uintptr_t);
     size_t real_capacity = (capacity + word_size - 1)/word_size;
 
-    self->mem = malloc(real_capacity * word_size);
+    self->mem = cast(uintptr_t*, malloc(real_capacity * word_size));
     self->size = 0;
     self->capacity = real_capacity;
 }
@@ -82,7 +90,7 @@ void* arena_allocb(Arena* self, size_t size) {
 
     size_t i = self->size;
     self->size += real_size;
-    return self->mem + i;
+    return cast(void*, self->mem + i);
 }
 
 void* arena_callocb(Arena* self, size_t size) {
@@ -108,7 +116,7 @@ char* arena_strdup(Arena* self, const char* cstr) {
     return dup;
 }
 
-char* arena_sprintf(Arena* restrict self, const char* restrict fmt, ...) {
+char* arena_sprintf(Arena* self, const char* fmt, ...) {
     va_list args;
     va_start(args, fmt);
     int n = vsnprintf(NULL, 0, fmt, args);
@@ -125,7 +133,7 @@ char* arena_sprintf(Arena* restrict self, const char* restrict fmt, ...) {
 size_t arena_get_offset(Arena* self, void* thing) {
     assert((void*)self->mem <= thing && thing < (void*)self->mem + self->capacity);
 
-    return thing - (void*)self->mem;
+    return cast(char*, thing) - cast(char*, self->mem);
 }
 
 void* arena_exportb(Arena* self, size_t offset, size_t size) {
