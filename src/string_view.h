@@ -38,6 +38,13 @@ StringView sv_trim_left_pred(StringView sv, sv_predicate_t pred);
 StringView sv_trim_right_pred(StringView sv, sv_predicate_t pred);
 StringView sv_trim_pred(StringView sv, sv_predicate_t pred);
 
+long sv_to_long(StringView* sv, int base);
+size_t sv_to_ulong(StringView* sv, int base);
+float sv_to_float(StringView* sv);
+double sv_to_double(StringView* sv);
+long long sv_to_longlong(StringView* sv, int base);
+unsigned long long sv_to_ulonglong(StringView* sv, int base);
+
 StringSplit sv_split(StringView sv, char c);
 StringSplit sv_split_pred(StringView sv, sv_predicate_t pred);
 
@@ -127,6 +134,54 @@ StringView sv_trim_right(StringView sv) {
 
 StringView sv_trim(StringView sv) {
     return sv_trim_left(sv_trim_right(sv));
+}
+
+long sv_to_long(StringView* sv, int base) {
+    char* end = NULL;
+    long num = strtol(sv->start, &end, base);
+    sv->len -= end - sv->start;
+    sv->start = end;
+    return num;
+}
+
+size_t sv_to_ulong(StringView* sv, int base) {
+    char* end = NULL;
+    size_t num = strtoul(sv->start, &end, base);
+    sv->len -= end - sv->start;
+    sv->start = end;
+    return num;
+}
+
+double sv_to_double(StringView* sv) {
+    char* end = NULL;
+    double num = strtod(sv->start, &end);
+    sv->len -= end - sv->start;
+    sv->start = end;
+    return num;
+}
+
+float sv_to_float(StringView* sv) {
+    char* end = NULL;
+    float num = strtof(sv->start, &end);
+    sv->len -= end - sv->start;
+    sv->start = end;
+    return num;
+}
+
+unsigned long long sv_to_ulonglong(StringView* sv, int base) {
+    char* end = NULL;
+    unsigned long long num = strtoull(sv->start, &end, base);
+    sv->len -= end - sv->start;
+    sv->start = end;
+    return num;
+}
+
+long long sv_to_longlong(StringView* sv, int base) {
+    char* end = NULL;
+    long long num = strtoll(sv->start, &end, base);
+    sv->len -= end - sv->start;
+    sv->start = end;
+    return num;
 }
 
 StringSplit sv_split(StringView sv, char c) {

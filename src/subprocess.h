@@ -4,6 +4,7 @@
 #include <stddef.h>
 
 #include <unistd.h>
+#include <sys/wait.h>
 
 typedef struct {
     int pid;
@@ -32,6 +33,7 @@ bool subprocess_kill_ex(Process* proc, int sig);
 
 #include <sys/wait.h>
 #include <unistd.h>
+#include <signal.h>
 
 bool subprocess_run(const char* file, char* const* argv, size_t argv_count) {
     pid_t pid = subprocess_create(file, argv, argv_count);
