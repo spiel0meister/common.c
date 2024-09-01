@@ -1,5 +1,6 @@
 #ifndef STRING_BUILDER_H_
 #define STRING_BUILDER_H_
+#include <stdio.h>
 #include <stddef.h>
 #include <stdbool.h>
 
@@ -29,7 +30,7 @@ void sb_push_str_null(StringBuilder* sb, ...);
 
 // Pushes a formatted string to a string builder
 __attribute__((format(printf, 2, 3)))
-void sb_push_sprintf(StringBuilder* sb, const char* restrict fmt, ...);
+void sb_push_sprintf(StringBuilder* sb, const char* fmt, ...);
 
 // Pushes a sized string of certain length to a string builder 
 #define sb_push_nstr(self, str, len) sb_push_bytes(self, str, len)
@@ -42,8 +43,13 @@ void sb_push_bytes(StringBuilder* self, void* data, size_t sizeb);
 // Writes the contents of a string builder to a file
 bool sb_write_file(StringBuilder* self, const char* filepath);
 
+bool sb_fread(StringBuilder* sb, FILE* f, size_t n);
+
 // Reads the provided file and appends its contents into the provided SB.
 bool sb_read_file(StringBuilder* sb, const char* filepath); 
+
+// Reads the provided file in batches and appends its contents into the provided SB.
+bool sb_read_file_batches(StringBuilder* sb, const char* filepath);
 
 // Exports the contents of a string builder to heap memory 
 char* sb_export(StringBuilder const* sb);
@@ -147,6 +153,20 @@ bool sb_read_file(StringBuilder* sb, const char* filepath) {
     return true;
 } 
 
+bool sb_fread(StringBuilder* sb, FILE* f, size_t n) {
+    sb_maybe_resize(sb, n);
+
+    errno = 0;
+    size_t n_ = fread(sb->items + sb->count, 1, n, f);
+    if (errno != 0) {
+        fprintf(stderr, "Error reading file: %s\n", strerror(errno));
+        return false;
+    }
+
+    sb->count += n;
+    return n_ == n;
+}
+
 bool sb_write_file(StringBuilder* self, const char* filepath) {
     FILE* f = fopen(filepath, "wb");
     if (f == NULL) {
@@ -161,6 +181,34 @@ bool sb_write_file(StringBuilder* self, const char* filepath) {
 
     return true;
 }
+
+bool sb_read_file_batches(StringBuilder* sb, const char* filepath) {
+    FILE* f = fopen(filepath, "rb");
+    if (f == NULL) {
+        fprintf(stderr, "Couldn't open %s: %s\n", filepath, strerror(errno));
+        return false;
+    }
+
+    char buf[1024] = {0};
+    size_t n = 0;
+
+    errno = 0;
+    while ((n = fread(buf, 1, 1024, f)) > 0) {
+        if (errno != 0) {
+            fprintf(stderr, "Error reading file: %s\n", strerror(errno));
+            fclose(f);
+            return false;
+        }
+
+        sb_maybe_resize(sb, n);
+        sb_push_nstr(sb, buf, n);
+
+        errno = 0;
+    }
+
+    fclose(f);
+    return true;
+} 
 
 char* sb_export(StringBuilder const* sb) {
     char* out = SB_MALLOC(sizeof(char) * (sb->count + 1));
