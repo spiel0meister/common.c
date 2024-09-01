@@ -6,11 +6,9 @@
 extern "C" {
 #endif // __cplusplus
 
-typedef struct timespec Timespec;
-
-void perf_timestamp(Timespec* ts);
-long perf_diff_nanoseconds(Timespec* start);
-double perf_diff_seconds(Timespec* start);
+double clock_secs(clock_t start);
+double clock_msecs(clock_t start);
+long clock_nsecs(clock_t start);
 
 #ifdef __cplusplus
 }
@@ -18,24 +16,18 @@ double perf_diff_seconds(Timespec* start);
 
 #endif // PERF_H_
 
-#ifdef PERF_IMPLEMENTATION
-void perf_timestamp(Timespec* ts) {
-    timespec_get(ts, TIME_UTC);
+#ifdef CPERF_IMPLEMENTATION
+
+double clock_secs(clock_t start) {
+    return (double)(clock() - start) / CLOCKS_PER_SEC;
 }
 
-long perf_diff_nanoseconds(Timespec* start) {
-    Timespec now;
-    perf_timestamp(&now);
-    long delta_sec = now.tv_sec - start->tv_sec;
-    long delta_nsec = now.tv_nsec - start->tv_nsec;
-    return delta_sec * 1e9 + delta_nsec; 
+double clock_msecs(clock_t start) {
+    return clock_secs(start) * 1000;
 }
 
-double perf_diff_seconds(Timespec* start) {
-    Timespec now;
-    perf_timestamp(&now);
-    long delta_sec = now.tv_sec - start->tv_sec;
-    long delta_nsec = now.tv_nsec - start->tv_nsec;
-    return delta_sec + delta_nsec * 1e-9; 
+long clock_nsecs(clock_t start) {
+    return clock_secs(start) * 1000000;
 }
+
 #endif
