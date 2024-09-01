@@ -42,6 +42,12 @@
     (da)->items[i] = (da)->items[--(da)->count]; \
 } while (0)
 
+// TODO
+// #define da_remove_sorted(da, i) do { \
+//     memmove((da)->items + (i), (da)->items + (i) + 1, (da)->count - (i) - 1); \
+//     (da)->count--; \
+// } while (0)
+
 #define da_first(da) (DA_ASSERT((da)->count > 0), (da)->items[0])
 #define da_last(da) (DA_ASSERT((da)->count > 0), (da)->items[(da)->count - 1])
 
