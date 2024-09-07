@@ -24,7 +24,8 @@
 #define gcc_format_attr(last_pos, start_va) __attribute__((format(printf, last_pos, start_va)))
 
 #include <signal.h>
-#define BREAKPOINT() raise(SIGINT)
+#define BREAKPOINT() do { PANIC("%s:%d: BREAKPOINT", __FILE__, __LINE__); raise(SIGINT); } while (0)
+#define BREAKPOINT_IF() do { if (expr) { PANIC("%s:%d: BREAKPOINT", __FILE__, __LINE__); raise(SIGINT); } } while (0)
 
 bool dynlib_load(void** handle, const char* path, int mode);
 bool dynsym_load(void** sym, void* handle, const char* name);

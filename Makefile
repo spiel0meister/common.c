@@ -1,4 +1,4 @@
-CC=gcc
+CC=gcc -std=c11
 CFLAGS=-Wall -Wextra -ggdb -I./src/
 
 CPP=g++ -std=c++17
