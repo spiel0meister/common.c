@@ -6,6 +6,9 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
+#define PIPE_WRITE 1
+#define PIPE_READ 0
+
 typedef struct {
     int pid;
 
@@ -34,6 +37,8 @@ bool subprocess_kill_ex(Process* proc, int sig);
 #include <sys/wait.h>
 #include <unistd.h>
 #include <signal.h>
+
+char* strsignal(int sig);
 
 bool subprocess_run(const char* file, char* const* argv, size_t argv_count) {
     pid_t pid = subprocess_create(file, argv, argv_count);
@@ -88,9 +93,9 @@ Process subprocess_create_ex(const char* file, char* const* argv, size_t argv_co
         free(argv_copy);
         return proc;
     } else if (proc.pid == 0) {
-        dup2(proc.in_pipe[0], 0);
-        dup2(proc.out_pipe[1], 1);
-        dup2(proc.out_pipe[1], 2);
+        dup2(proc.in_pipe[PIPE_READ], 0);
+        dup2(proc.out_pipe[PIPE_WRITE], 1);
+        dup2(proc.out_pipe[PIPE_WRITE], 2);
 
         execvp(file, argv_copy);
 

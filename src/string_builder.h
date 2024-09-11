@@ -4,10 +4,6 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#ifndef SB_INIT_CAP
-#define SB_INIT_CAP 8
-#endif // SB_INIT_CAP
-
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
@@ -17,6 +13,7 @@ typedef struct {
     size_t count;
     size_t capacity;
 }StringBuilder;
+typedef StringBuilder SB;
 
 // Resizes a string builder 
 void sb_maybe_resize(StringBuilder* sb, size_t to_append_len);
@@ -38,11 +35,14 @@ void sb_push_sprintf(StringBuilder* sb, const char* fmt, ...);
 // Pushes bytes of certain length to a string builder 
 void sb_push_bytes(StringBuilder* self, void* data, size_t sizeb);
 
+// Writes the contents of a string builder to a file descriptor
+#define sb_write(sb, fd) write(fd, sb.items, sb.count)
 // Writes the contents of a string builder to a file handle
 #define sb_fwrite(sb, f) fwrite((sb)->items, 1, (sb)->count, f)
 // Writes the contents of a string builder to a file
 bool sb_write_file(StringBuilder* self, const char* filepath);
 
+bool sb_read(StringBuilder* sb, int fd, size_t n);
 bool sb_fread(StringBuilder* sb, FILE* f, size_t n);
 
 // Reads the provided file and appends its contents into the provided SB.
@@ -67,16 +67,21 @@ void sb_free(StringBuilder* sb);
 #endif // STRING_BUILDER_H_
 
 #ifdef SB_IMPLEMENTATION
-#ifndef SB_MALLOC
-    #define SB_MALLOC malloc
-#endif // SB_MALLOC
-
 #include <assert.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <errno.h>
+#include <unistd.h>
+
+#ifndef SB_MALLOC
+    #define SB_MALLOC malloc
+#endif // SB_MALLOC
+
+#ifndef SB_INIT_CAP
+#define SB_INIT_CAP 8
+#endif // SB_INIT_CAP
 
 void sb_maybe_resize(StringBuilder* sb, size_t to_append_len) {
     if (sb->count + to_append_len >= sb->capacity) {
@@ -165,6 +170,13 @@ bool sb_fread(StringBuilder* sb, FILE* f, size_t n) {
 
     sb->count += n;
     return n_ == n;
+}
+
+bool sb_read(StringBuilder* sb, int fd, size_t n) {
+    sb_maybe_resize(sb, n);
+    read(fd, sb->items + sb->count, n);
+    sb->count += n;
+    return true;
 }
 
 bool sb_write_file(StringBuilder* self, const char* filepath) {
