@@ -2,6 +2,7 @@
 #define TSPRINTF_H_
 #include <stddef.h>
 
+__attribute__((format(printf, 1, 2)))
 char* tsprintf(const char* fmt, ...);
 size_t tsnapshot();
 void trewind(size_t snapshot);
