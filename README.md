@@ -12,3 +12,7 @@ Contains the following:
 - [macros.h](./src/macros.h): QOL Macros
 - [subprocess.h](./src/subprocess.h): Create Subprocess
 - [netsock.h](./src/netsock.h): Networking (TCP)
+- [leakcheck.h](./src/leakcheck.h): Simple leakchecking
+- [tsprintf.h](./src/tsprintf.h): Temporary sprintf buffer
+- [types.h](./src/types.h): Good typedefs
+- [utils.h](./src/utils.h): Miscellaneous utilities
