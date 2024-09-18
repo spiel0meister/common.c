@@ -15,4 +15,5 @@ Contains the following:
 - [leakcheck.h](./src/leakcheck.h): Simple leakchecking
 - [tsprintf.h](./src/tsprintf.h): Temporary sprintf buffer
 - [types.h](./src/types.h): Good typedefs
+- [easings.h](./src/easings.h): Easings implementation from <https://easings.net/>
 - [utils.h](./src/utils.h): Miscellaneous utilities
