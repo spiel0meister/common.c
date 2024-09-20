@@ -48,6 +48,9 @@ bool sb_fread(StringBuilder* sb, FILE* f, size_t n);
 // Reads the provided file and appends its contents into the provided SB.
 bool sb_read_file(StringBuilder* sb, const char* filepath); 
 
+// Downloads file with CURL
+bool sb_download_file(StringBuilder* sb, const char* url);
+
 // Reads the provided file in batches and appends its contents into the provided SB.
 bool sb_read_file_batches(StringBuilder* sb, const char* filepath);
 
@@ -72,6 +75,8 @@ void sb_free(StringBuilder* sb);
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+
+#include <curl/curl.h>
 #include <errno.h>
 #include <unistd.h>
 
@@ -82,6 +87,15 @@ void sb_free(StringBuilder* sb);
 #ifndef SB_INIT_CAP
 #define SB_INIT_CAP 8
 #endif // SB_INIT_CAP
+
+size_t __curl_sb(void *contents, size_t sz, size_t nmemb, void *ctx) {
+    size_t realsize = sz * nmemb;
+
+    sb_maybe_resize(ctx, realsize);
+    sb_push_nstr(ctx, contents, realsize);
+
+    return realsize;
+}
 
 void sb_maybe_resize(StringBuilder* sb, size_t to_append_len) {
     if (sb->count + to_append_len >= sb->capacity) {
@@ -170,6 +184,28 @@ bool sb_fread(StringBuilder* sb, FILE* f, size_t n) {
 
     sb->count += n;
     return n_ == n;
+}
+
+bool sb_download_file(StringBuilder* sb, const char* url) {
+    CURL* h = curl_easy_init();
+    if (h == NULL) {
+        fprintf(stderr, "Couldn't init CURL context\n");
+        return false;
+    }
+
+    curl_easy_setopt(h, CURLOPT_URL, url);
+    curl_easy_setopt(h, CURLOPT_WRITEFUNCTION, __curl_sb);
+    curl_easy_setopt(h, CURLOPT_WRITEDATA, sb);
+
+    CURLcode ret = curl_easy_perform(h);
+    if (ret != CURLE_OK) {
+        fprintf(stderr, "Couldn't download %s: %s\n", url, curl_easy_strerror(ret));
+        curl_easy_cleanup(h);
+        return false;
+    }
+
+    curl_easy_cleanup(h);
+    return true;
 }
 
 bool sb_read(StringBuilder* sb, int fd, size_t n) {
