@@ -48,8 +48,10 @@ bool sb_fread(StringBuilder* sb, FILE* f, size_t n);
 // Reads the provided file and appends its contents into the provided SB.
 bool sb_read_file(StringBuilder* sb, const char* filepath); 
 
+#ifndef SB_NO_CURL
 // Downloads file with CURL
 bool sb_download_file(StringBuilder* sb, const char* url);
+#endif // SB_NO_CURL
 
 // Reads the provided file in batches and appends its contents into the provided SB.
 bool sb_read_file_batches(StringBuilder* sb, const char* filepath);
@@ -76,7 +78,9 @@ void sb_free(StringBuilder* sb);
 #include <string.h>
 #include <stdio.h>
 
+#ifndef SB_NO_CURL
 #include <curl/curl.h>
+#endif // SB_NO_CURL
 #include <errno.h>
 #include <unistd.h>
 
@@ -186,6 +190,7 @@ bool sb_fread(StringBuilder* sb, FILE* f, size_t n) {
     return n_ == n;
 }
 
+#ifndef SB_NO_CURL
 bool sb_download_file(StringBuilder* sb, const char* url) {
     CURL* h = curl_easy_init();
     if (h == NULL) {
@@ -207,6 +212,7 @@ bool sb_download_file(StringBuilder* sb, const char* url) {
     curl_easy_cleanup(h);
     return true;
 }
+#endif // SB_NO_CURL
 
 bool sb_read(StringBuilder* sb, int fd, size_t n) {
     sb_maybe_resize(sb, n);
