@@ -16,3 +16,7 @@ testcpp: main.cpp $(foreach mod, $(MODS), src/$(mod).h)
 
 %/:
 	mkdir -p $@
+
+clean:
+	rm -rf testc testcpp
+
