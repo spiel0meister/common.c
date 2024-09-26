@@ -24,11 +24,18 @@
 #define gcc_format_attr(last_pos, start_va) __attribute__((format(printf, last_pos, start_va)))
 
 #include <signal.h>
-#define BREAKPOINT() do { PANIC("%s:%d: BREAKPOINT", __FILE__, __LINE__); raise(SIGINT); } while (0)
-#define BREAKPOINT_IF() do { if (expr) { PANIC("%s:%d: BREAKPOINT", __FILE__, __LINE__); raise(SIGINT); } } while (0)
+#define BREAKPOINT() do { eprintf("%s:%d: BREAKPOINT", __FILE__, __LINE__); raise(SIGINT); } while (0)
+#define BREAKPOINT_IF() do { if (expr) { eprintf("%s:%d: BREAKPOINT", __FILE__, __LINE__); raise(SIGINT); } } while (0)
 
 bool dynlib_load(void** handle, const char* path, int mode);
 bool dynsym_load(void** sym, void* handle, const char* name);
+
+#define simple_log_info(...) do { printf("[INFO] "); printf(__VA_ARGS__); } while (0)
+#define simple_log_warn(...) do { printf("[WARNING] "); printf(__VA_ARGS__); } while (0)
+#define simple_log_err(...) do { printf("[ERROR] "); printf(__VA_ARGS__); } while (0)
+#define simple_flog_info(f, ...) do { fprintf(f, "[INFO] "); fprintf(f, __VA_ARGS__); } while (0)
+#define simple_flog_warn(f, ...) do { fprintf(f, "[WARNING] "); fprintf(f, __VA_ARGS__); } while (0)
+#define simple_flog_err(f, ...) do { fprintf(f, "[ERROR] "); fprintf(f, __VA_ARGS__); } while (0)
 
 #endif // UTILS_H_
 
