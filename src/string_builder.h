@@ -21,6 +21,8 @@ void sb_maybe_resize(StringBuilder* sb, size_t to_append_len);
 // Pushes a character to a string builder 
 void sb_push(StringBuilder* sb, char c);
 
+#define sb_push_null(sb) sb_push(sb, 0)
+
 void sb_push_str_null(StringBuilder* sb, ...);
 // Pushes a variadic amount of null-terminated strings to a string builder 
 #define sb_push_str(sb, ...) sb_push_str_null(sb, __VA_ARGS__, NULL)
