@@ -26,7 +26,7 @@ Proc start_procces_exv(char* file, ...);
 
 #endif // SUBPROCCES_H_
 
-#ifdef SUBPROCCES_IMPLENTATION
+#ifdef SUBPROCCES_IMPLEMENTATION
 #include <string.h>
 #include <errno.h>
 
@@ -227,7 +227,7 @@ bool wait_for_process(pid_t pid) {
         }
 
         if (WIFSIGNALED(wstatus)) {
-            fprintf(stderr, "Process was %s\n", strsignal(WTERMSIG(wstatus)));
+            fprintf(stderr, "Process was terminated by signal %d (%s)\n", WTERMSIG(wstatus), strsignal(WTERMSIG(wstatus)));
             return false;
         }
     }
@@ -235,4 +235,4 @@ bool wait_for_process(pid_t pid) {
     return true;
 }
 
-#endif // SUBPROCCES_IMPLENTATION
+#endif // SUBPROCCES_IMPLEMENTATION
