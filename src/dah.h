@@ -29,6 +29,8 @@ typedef struct {
 #define dah_reset(da) (da_getheader(da)->count = 0)
 #define dah_free(da) ((da) = dah__free(da))
 
+#define dah_getlen(da) (dah_getheader(da)->count)
+
 #define dah_for(da, counter) for (size_t counter = 0; counter < dah_getheader(da)->count; ++counter)
 #define dah_foreach(da, Type, ptr) for (Type* ptr = da; ptr < da + dah_getheader(da)->count; ++ptr)
 
@@ -43,7 +45,10 @@ void* dah__free(void* da);
 #include <string.h>
 
 DaHeader* dah__default_header(size_t item_size) {
-    return DAH_MALLOC(sizeof(DaHeader) + item_size * DAH_INIT_CAPACITY);
+    DaHeader* header = DAH_MALLOC(sizeof(DaHeader) + item_size * DAH_INIT_CAPACITY);
+    header->count = 0;
+    header->capacity = DAH_INIT_CAPACITY;
+    return header;
 }
 
 void* dah__maybe_resize(void* da, size_t to_add, size_t item_size) {
