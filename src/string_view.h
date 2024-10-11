@@ -28,6 +28,8 @@ typedef struct {
 StringView sv_from_parts(const char* start, size_t len);
 #define sv_from_cstr(str) sv_from_parts(str, strlen(str))
 
+void sv_step(StringView* self);
+
 StringView sv_chop_by_c(StringView* sv, char delim);
 StringView sv_trim_left(StringView sv);
 StringView sv_trim_right(StringView sv);
@@ -85,6 +87,11 @@ static void split_append(StringSplit* split, StringView sv) {
 
 StringView sv_from_parts(const char* start, size_t len) {
     return (StringView) { .start = start, .len = len };
+}
+
+void sv_step(StringView* self) {
+    self->start += 1;
+    self->len -= 1;
 }
 
 StringView sv_chop_by_c(StringView* sv, char delim) {
