@@ -63,6 +63,8 @@ char* sv_to_cstr_inplace(StringView sv, char buf[sv.len + 1]);
 #endif // STRING_VIEW_H_
 
 #ifdef SV_IMPLEMENTATION
+#undef SV_IMPLEMENTATION
+
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>

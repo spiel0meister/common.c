@@ -60,6 +60,8 @@ bool arena_can_allocb(Arena* self, size_t size);
 #endif // ARENA_H_
 
 #ifdef ARENA_IMPLEMENTATION
+#undef ARENA_IMPLEMENTATION
+
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdio.h>
