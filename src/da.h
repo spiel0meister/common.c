@@ -5,7 +5,7 @@
 #ifndef DA_SIZE_TYPE
 #include <stddef.h>
 #define DA_SIZE_TYPE size_t
-#endif // DA_INT_TYPE
+#endif // DA_SIZE_TYPE
 
 #ifndef DA_SORT
 #include <stdlib.h>
@@ -17,13 +17,23 @@
 #define DA_ASSERT(expr) assert(expr)
 #endif // DA_ASSERT
 
+#ifndef DA_REALLOC
+#include <stdlib.h>
+#define DA_REALLOC realloc
+#endif // DA_REALLOC
+
+#ifndef DA_FREE
+#include <stdlib.h>
+#define DA_FREE free
+#endif // DA_FREE
+
 #define DA(Type) Type* items; DA_SIZE_TYPE count; DA_SIZE_TYPE capacity
 
 #define da_maybe_resize(da, to_add_count) do {\
     if ((da)->count + (to_add_count) > (da)->capacity) { \
         if ((da)->capacity == 0) ((da)->capacity) = 16; \
         while ((da)->count >= (da)->capacity) (da)->capacity *= 2; \
-        (da)->items = realloc((da)->items, sizeof((da)->items[0]) * (da)->capacity); \
+        (da)->items = DA_REALLOC((da)->items, sizeof((da)->items[0]) * (da)->capacity); \
     } \
 } while (0)
 
@@ -54,7 +64,7 @@
 #define da_sort(da, compare_fn) DA_SORT((da)->items, (da)->count, sizeof((da)->items[0]), compare_fn)
 
 #define da_free(da) do { \
-        free((da)->items); \
+        DA_FREE((da)->items); \
         (da)->items = NULL; \
         (da)->count = 0; \
         (da)->capacity = 0; \

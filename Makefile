@@ -1,5 +1,5 @@
 CC=gcc -std=c11
-CFLAGS=-Wall -Wextra -ggdb -I./src/
+CFLAGS=-Wall -Wextra -ggdb -I./src/ -fsanitize=address,leak
 LIBS=-lcurl
 
 CPP=g++ -std=c++17
