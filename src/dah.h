@@ -22,6 +22,8 @@ typedef struct {
 
 #define DAH_INIT_CAPACITY 16
 
+#define dah_init(da) ((da) = (void*)dah__default_header(sizeof(Statement))->data)
+
 #define dah_append(da, v) ((da) = dah__maybe_resize(da, 1, sizeof(*(da))), (da)[dah_getheader(da)->count++] = (v))
 #define dah_append_many(da, vs, vcount) ((da) = dah__maybe_resize(da, vcount, sizeof(*(da))), memcpy((da) + dah_getheader(da)->count, vs, vcount * sizeof(*(da))), dah_getheader(da)->count += vcount)
 #define dah_remove_unordered(da, i) ((da)[i] = (da)[--dah_getheader(da)->count])
