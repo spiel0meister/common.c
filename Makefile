@@ -1,6 +1,6 @@
 CC=gcc -std=c11
 CFLAGS=-Wall -Wextra -Wpedantic -ggdb -I./src/ -fsanitize=address,leak
-LIBS=-lcurl
+# LIBS=-lcurl
 
 all: testc 
 

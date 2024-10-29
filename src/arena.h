@@ -40,18 +40,26 @@ Arena arena_new(size_t capacity);
 void arena_prealloc(Arena* self, size_t capacity);
 char* arena_strdup(Arena* self, const char* cstr);
 char* arena_sprintf(Arena* self, const char* fmt, ...);
-size_t arena_get_offset(Arena* self, void* thing);
-void* arena_exportb(Arena* self, size_t offset, size_t size);
-#define arena_export(arena, offset, Type) (Type*)arena_exportb(arena, offset, sizeof(Type))
+
+size_t arena_snapshot(Arena* self);
+void arena_rewind(Arena* self, size_t offset);
 
 void arena_free(Arena* self);
-void arena_reset(Arena* self);
-#define arena_reset(arena) (arena)->size = 0
+#define arena_reset(arena) ((arena)->size = 0)
 
 void* arena_allocb(Arena* self, size_t size);
 void* arena_callocb(Arena* self, size_t size);
 void* arena_memdupb(Arena* self, void* mem, size_t size);
 bool arena_can_allocb(Arena* self, size_t size);
+
+extern Arena temp_arena;
+#define temp_prealloc(size) arena_prealloc(&temp_arena, size)
+#define temp_alloc(Type) arena_alloc(&temp_arena, Type)
+#define temp_allocb(size) arena_allocb(&temp_arena, size)
+#define temp_sprintf(...) arena_sprintf(&temp_arena, __VA_ARGS__)
+#define temp_snapshot() arena_snapshot(&temp_arena)
+#define temp_rewind(offset) arena_rewind(&temp_arena, offset)
+#define temp_free() arena_free(&temp_arena)
 
 #ifdef __cplusplus
 }
@@ -67,6 +75,8 @@ bool arena_can_allocb(Arena* self, size_t size);
 #include <stdio.h>
 #include <string.h>
 
+Arena temp_arena = {0};
+
 Arena arena_new(size_t capacity) {
     Arena a = {0};
     arena_prealloc(&a, capacity);
@@ -80,6 +90,14 @@ void arena_prealloc(Arena* self, size_t capacity) {
     self->mem = cast(uintptr_t*, malloc(real_capacity * word_size));
     self->size = 0;
     self->capacity = real_capacity;
+}
+
+size_t arena_snapshot(Arena* self) {
+    return self->size;
+}
+
+void arena_rewind(Arena* self, size_t offset) {
+    self->size = offset;
 }
 
 void* arena_allocb(Arena* self, size_t size) {
