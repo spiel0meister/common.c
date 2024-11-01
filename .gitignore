@@ -1,2 +1,4 @@
 testc
 .clangd
+Makefile
+main.c
