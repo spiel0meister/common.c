@@ -144,7 +144,7 @@ int flag_parse(int argc, char** argv) {
                     case FLAG_STR:
                         if (argc < 1) {
                             fprintf(stderr, "Missing argument for flag -%s\n", arg);
-                            return -1;
+                            exit(1);
                         }
 
                         flags[i].as.cstr = flag__shift_args(&argc, &argv);
@@ -152,7 +152,7 @@ int flag_parse(int argc, char** argv) {
                     case FLAG_INT:
                         if (argc < 1) {
                             fprintf(stderr, "Missing argument for flag -%s\n", arg);
-                            return -1;
+                            exit(1);
                         }
 
                         flags[i].as.i = atoi(flag__shift_args(&argc, &argv));
@@ -160,7 +160,7 @@ int flag_parse(int argc, char** argv) {
                     case FLAG_FLOAT:
                         if (argc < 1) {
                             fprintf(stderr, "Missing argument for flag -%s\n", arg);
-                            return -1;
+                            exit(1);
                         }
 
                         flags[i].as.f = atof(flag__shift_args(&argc, &argv));
@@ -168,7 +168,7 @@ int flag_parse(int argc, char** argv) {
                     case FLAG_LONG:
                         if (argc < 1) {
                             fprintf(stderr, "Missing argument for flag -%s\n", arg);
-                            return -1;
+                            exit(1);
                         }
 
                         flags[i].as.l = atol(flag__shift_args(&argc, &argv));
@@ -176,7 +176,7 @@ int flag_parse(int argc, char** argv) {
                     case FLAG_LLONG:
                         if (argc < 1) {
                             fprintf(stderr, "Missing argument for flag -%s\n", arg);
-                            return -1;
+                            exit(1);
                         }
 
                         flags[i].as.ll = atoll(flag__shift_args(&argc, &argv));
