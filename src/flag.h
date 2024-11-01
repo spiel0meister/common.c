@@ -135,15 +135,17 @@ int flag_parse(int argc, char** argv) {
                 exit(0);
             }
 
+            bool found = false;
             for (size_t i = 0; i < flags_size; ++i) {
                 if (strcmp(flags[i].name, arg) == 0) {
+                    found = true;
                     switch (flags[i].type) {
                     case FLAG_OPTION:
                         flags[i].as.option = true;
                         break;
                     case FLAG_STR:
                         if (argc < 1) {
-                            fprintf(stderr, "Missing argument for flag -%s\n", arg);
+                            fprintf(stderr, "ERROR: Missing argument for flag -%s\n", arg);
                             exit(1);
                         }
 
@@ -151,7 +153,7 @@ int flag_parse(int argc, char** argv) {
                         break;
                     case FLAG_INT:
                         if (argc < 1) {
-                            fprintf(stderr, "Missing argument for flag -%s\n", arg);
+                            fprintf(stderr, "ERROR: Missing argument for flag -%s\n", arg);
                             exit(1);
                         }
 
@@ -159,7 +161,7 @@ int flag_parse(int argc, char** argv) {
                         break;
                     case FLAG_FLOAT:
                         if (argc < 1) {
-                            fprintf(stderr, "Missing argument for flag -%s\n", arg);
+                            fprintf(stderr, "ERROR: Missing argument for flag -%s\n", arg);
                             exit(1);
                         }
 
@@ -167,7 +169,7 @@ int flag_parse(int argc, char** argv) {
                         break;
                     case FLAG_LONG:
                         if (argc < 1) {
-                            fprintf(stderr, "Missing argument for flag -%s\n", arg);
+                            fprintf(stderr, "ERROR: Missing argument for flag -%s\n", arg);
                             exit(1);
                         }
 
@@ -175,7 +177,7 @@ int flag_parse(int argc, char** argv) {
                         break;
                     case FLAG_LLONG:
                         if (argc < 1) {
-                            fprintf(stderr, "Missing argument for flag -%s\n", arg);
+                            fprintf(stderr, "ERROR: Missing argument for flag -%s\n", arg);
                             exit(1);
                         }
 
@@ -186,6 +188,11 @@ int flag_parse(int argc, char** argv) {
                         break;
                     }
                 }
+            }
+
+            if (!found) {
+                fprintf(stderr, "ERROR: Unknown flag -%s\n", arg);
+                exit(1);
             }
         } else {
             return saved_argc - argc;
