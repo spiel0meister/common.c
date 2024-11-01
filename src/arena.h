@@ -101,6 +101,8 @@ void arena_rewind(Arena* self, size_t offset) {
 }
 
 void* arena_allocb(Arena* self, size_t size) {
+    assert(self->mem != NULL && "Arena in not prealloced");
+
     size_t word_size = sizeof(uintptr_t);
     size_t real_size = (size + word_size - 1)/word_size;
 
