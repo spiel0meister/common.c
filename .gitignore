@@ -1,4 +1,6 @@
-testc
+test.c
+dummy.c
+test
+dummy
 .clangd
 Makefile
-main.c
