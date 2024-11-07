@@ -22,7 +22,7 @@ typedef struct arena_region_s {
     size_t count;
     struct arena_region_s* next;
 
-    uint8_t data[];
+    uintptr_t data[];
 }ArenaRegion;
 
 typedef struct {
@@ -35,6 +35,8 @@ typedef struct {
 }ArenaMark;
 
 void* arena_alloc(Arena* self, size_t size);
+#define arena_calloc(arena, size) memset(arena_alloc(arena, size), 0, size)
+void* arena_realloc(Arena* self, size_t oldsize, size_t newsize, void* ptr);
 #define arena_memdup(arena, ptr, size) memcpy(arena_alloc(arena, size), ptr, size)
 char* arena_sprintf(Arena* self, const char* fmt, ...);
 char* arena_strdup(Arena* self, const char* cstr);
@@ -55,7 +57,7 @@ void arena_free(Arena* self);
 
 void* arena_alloc(Arena* self, size_t size) {
     if (self->end == NULL) {
-        self->end = ARENA_MALLOC(sizeof(*self->start) + REGION_DEFAULT_SIZE);
+        self->end = ARENA_MALLOC(sizeof(*self->start) + REGION_DEFAULT_SIZE * sizeof(*self->start->data));
         self->end->count = 0;
         self->end->capacity = REGION_DEFAULT_SIZE;
         self->end->next = NULL;
@@ -68,16 +70,24 @@ void* arena_alloc(Arena* self, size_t size) {
     }
 
     if (self->end->count + size > self->end->capacity) {
-        self->end->next = ARENA_MALLOC(sizeof(*self->end->next) + REGION_DEFAULT_SIZE);
+        self->end->next = ARENA_MALLOC(sizeof(*self->end->next) + REGION_DEFAULT_SIZE * sizeof(*self->start->data));
         self->end->next->count = 0;
         self->end->next->capacity = REGION_DEFAULT_SIZE;
         self->end->next->next = NULL;
         self->end = self->end->next;
     }
 
+    size_t word_size = sizeof(uintptr_t);
+    size_t realsize = (size + word_size - 1) / word_size;
+
     void* mem = self->end->data + self->end->count;
-    self->end->count += size;
+    self->end->count += realsize;
     return mem;
+}
+
+void* arena_realloc(Arena* self, size_t oldsize, size_t newsize, void* ptr) {
+    void* newptr = arena_alloc(self, newsize);
+    return memcpy(newptr, ptr, oldsize);
 }
 
 char* arena_sprintf(Arena* self, const char* fmt, ...) {
@@ -137,11 +147,11 @@ void arena_jumpback(Arena* self, ArenaMark mark) {
 
 void arena_free(Arena* self) {
     ArenaRegion* r = self->start;
-    do {
+    while (r != NULL) {
         ArenaRegion* n = r->next;
         ARENA_FREE(r);
         r = n;
-    } while (r != NULL);
+    }
     self->start = NULL;
     self->end = NULL;
 }
