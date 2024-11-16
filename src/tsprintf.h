@@ -9,7 +9,10 @@ void trewind(size_t snapshot);
 void treset();
 
 #endif // TSPRINTF_H_
+
 #ifdef TSPRINTF_IMPLEMENTATION
+#undef TSPRINTF_IMPLEMENTATION
+
 #include <assert.h>
 #include <stdarg.h>
 

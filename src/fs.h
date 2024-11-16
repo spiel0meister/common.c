@@ -7,6 +7,8 @@
 char* read_file(const char* path, size_t* size);
 
 #ifdef FS_IMPLEMENTATION
+#undef FS_IMPLEMENTATION
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -25,8 +27,9 @@ char* read_file(const char* path, size_t* size) {
 
     char* s = malloc(size_ + 1);
     fread(s, 1, size_, f);
-    fclose(f);
+    s[size_] = 0;
 
+    fclose(f);
     if (size != NULL) *size = size_;
     return s;
 }

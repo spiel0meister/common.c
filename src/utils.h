@@ -40,6 +40,8 @@ bool dynsym_load(void** sym, void* handle, const char* name);
 #endif // UTILS_H_
 
 #ifdef UTILS_IMPLEMENTATION
+#undef UTILS_IMPLEMENTATION
+
 #include <dlfcn.h>
 #include <stdio.h>
 

@@ -6,6 +6,21 @@
 #define PI 3.14159 
 #endif // PI
 
+#ifndef EASINGS_POWF
+#include <math.h>
+#define EASINGS_POWF powf
+#endif
+
+#ifndef EASINGS_SQRTF
+#include <math.h>
+#define EASINGS_SQRTF sqrtf
+#endif
+
+#ifndef EASINGS_EXP2F
+#include <math.h>
+#define EASINGS_EXP2F exp2f
+#endif
+
 float ease_in_sine(float t);
 float ease_out_sine(float t);
 float ease_in_out_sine(float t);
@@ -49,6 +64,8 @@ float ease_in_out_bounce(float t);
 #endif // EASINGS_H_
 
 #ifdef EASINGS_IMPLEMENTATION
+#undef EASINGS_IMPLEMENTATION
+
 float ease_in_sine(float t) {
     return 1 - cos((t * PI) / 2);
 }
@@ -70,7 +87,7 @@ float ease_out_quad(float t) {
 }
 
 float ease_in_out_quad(float t) {
-    return t < 0.5 ? 2 * t * t : 1 - powf(-2 * t + 2, 2) / 2;
+    return t < 0.5 ? 2 * t * t : 1 - EASINGS_POWF(-2 * t + 2, 2) / 2;
 }
 
 float ease_in_cubic(float t) {
@@ -78,11 +95,11 @@ float ease_in_cubic(float t) {
 }
 
 float ease_out_cubic(float t) {
-    return 1 - powf(1 - t, 3);
+    return 1 - EASINGS_POWF(1 - t, 3);
 }
 
 float ease_in_out_cubic(float t) {
-    return t < 0.5 ? 4 * t * t * t : 1 - powf(-2 * t + 2, 3) / 2;
+    return t < 0.5 ? 4 * t * t * t : 1 - EASINGS_POWF(-2 * t + 2, 3) / 2;
 }
 
 float ease_in_quart(float t) {
@@ -90,11 +107,11 @@ float ease_in_quart(float t) {
 }
 
 float ease_out_quart(float t) {
-    return 1 - powf(1 - t, 4);
+    return 1 - EASINGS_POWF(1 - t, 4);
 }
 
 float ease_in_out_quart(float t) {
-    return t < 0.5 ? 8 * t * t * t * t : 1 - powf(-2 * t + 2, 4) / 2;
+    return t < 0.5 ? 8 * t * t * t * t : 1 - EASINGS_POWF(-2 * t + 2, 4) / 2;
 }
 
 float ease_in_quint(float t) {
@@ -102,39 +119,39 @@ float ease_in_quint(float t) {
 }
 
 float ease_out_quint(float t) {
-    return 1 - powf(1 - t, 5);
+    return 1 - EASINGS_POWF(1 - t, 5);
 }
 
 float ease_in_out_quint(float t) {
-    return t < 0.5 ? 16 * t * t * t * t * t : 1 - powf(-2 * t + 2, 5) / 2;
+    return t < 0.5 ? 16 * t * t * t * t * t : 1 - EASINGS_POWF(-2 * t + 2, 5) / 2;
 }
 
 float ease_in_expo(float t) {
-    return t == 0.0f ? 0.0f : exp2f(10 * t - 10);
+    return t == 0.0f ? 0.0f : EASINGS_EXP2F(10 * t - 10);
 }
 
 float ease_out_expo(float t) {
-    return t == 1.0f ? 1.0f : 1 - exp2f(-10 * t);
+    return t == 1.0f ? 1.0f : 1 - EASINGS_EXP2F(-10 * t);
 }
 
 float ease_in_out_expo(float t) {
     if (t == 0) return 0;
     else if (t == 1) return 1;
-    else if (t < 0.5) return exp2f(20 * t - 10) / 2;
-    else return (2 - exp2f(-20 * t + 10)) / 2;
+    else if (t < 0.5) return EASINGS_EXP2F(20 * t - 10) / 2;
+    else return (2 - EASINGS_EXP2F(-20 * t + 10)) / 2;
 }
 
 float ease_in_circ(float t) {
-    return 1 - sqrtf(1 - t * t);
+    return 1 - EASINGS_SQRTF(1 - t * t);
 }
 
 float ease_out_circ(float t) {
-    return sqrtf(1 - powf(t - 1, 2));
+    return EASINGS_SQRTF(1 - EASINGS_POWF(t - 1, 2));
 }
 
 float ease_in_out_circ(float t) {
-    if (t < 0.5) return (1 - sqrtf(1 - powf(2 * t, 2))) / 2;
-    else return (sqrtf(1 - powf(-2 * t + 2, 2)) + 1) / 2;
+    if (t < 0.5) return (1 - EASINGS_SQRTF(1 - EASINGS_POWF(2 * t, 2))) / 2;
+    else return (EASINGS_SQRTF(1 - EASINGS_POWF(-2 * t + 2, 2)) + 1) / 2;
 }
 
 float ease_in_back(float t) {
@@ -146,15 +163,15 @@ float ease_in_back(float t) {
 float ease_out_back(float t) {
     float c1 = 1.70158f;
     float c3 = c1 + 1;
-    return 1 + c3 * powf(t - 1, 3) + c1 * powf(t - 1, 2);
+    return 1 + c3 * EASINGS_POWF(t - 1, 3) + c1 * EASINGS_POWF(t - 1, 2);
 }
 
 float ease_in_out_back(float t) {
     float c1 = 1.70158f;
     float c3 = c1 + 1;
 
-    if (t < 0.5) return (powf(2 * t, 2) * ((c3 + 1) * 2 * t - c3)) / 2;
-    else return (powf(2 * t - 2, 2) * ((c3 + 1) * (t * 2 - 2) + c3) + 2) / 2;
+    if (t < 0.5) return (EASINGS_POWF(2 * t, 2) * ((c3 + 1) * 2 * t - c3)) / 2;
+    else return (EASINGS_POWF(2 * t - 2, 2) * ((c3 + 1) * (t * 2 - 2) + c3) + 2) / 2;
 }
 
 float ease_in_elastic(float t) {
@@ -164,7 +181,7 @@ float ease_in_elastic(float t) {
         ? 0
         : t == 1
         ? 1
-        : -powf(2, 10 * t - 10) * sinf((t * 10 - 10.75) * c1);
+        : -EASINGS_POWF(2, 10 * t - 10) * sinf((t * 10 - 10.75) * c1);
 }
 
 float ease_out_elastic(float t) {
@@ -174,7 +191,7 @@ float ease_out_elastic(float t) {
         ? 0
         : t == 1
         ? 1
-        : powf(2, -10 * t) * sinf((t * 10 - 0.75) * c1) + 1;
+        : EASINGS_POWF(2, -10 * t) * sinf((t * 10 - 0.75) * c1) + 1;
 }
 
 float ease_in_out_elastic(float t) {
@@ -185,8 +202,8 @@ float ease_in_out_elastic(float t) {
         : t == 1
         ? 1
         : t < 0.5
-        ? -(powf(2, 20 * t - 10) * sinf((20 * t - 11.125) * c1)) / 2
-        : (powf(2, -20 * t + 10) * sinf((20 * t - 11.125) * c1)) / 2 + 1;
+        ? -(EASINGS_POWF(2, 20 * t - 10) * sinf((20 * t - 11.125) * c1)) / 2
+        : (EASINGS_POWF(2, -20 * t + 10) * sinf((20 * t - 11.125) * c1)) / 2 + 1;
 }
 
 float ease_in_bounce(float t) {

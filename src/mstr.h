@@ -49,6 +49,8 @@ double str_chop_double(str* str);
 #endif // MODERN_STRING_H_
 
 #ifdef MODERN_STRING_IMPLEMENTATION
+#undef MODERN_STRING_IMPLEMENTATION
+
 #include <assert.h>
 #include <stdlib.h>
 #include <stdarg.h>

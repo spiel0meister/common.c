@@ -74,6 +74,8 @@ void sb_free(StringBuilder* sb);
 #endif // STRING_BUILDER_H_
 
 #ifdef SB_IMPLEMENTATION
+#undef SB_IMPLEMENTATION
+
 #include <assert.h>
 #include <stdarg.h>
 #include <stdlib.h>

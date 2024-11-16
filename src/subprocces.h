@@ -27,6 +27,8 @@ Proc start_procces_exv(char* file, ...);
 #endif // SUBPROCCES_H_
 
 #ifdef SUBPROCCES_IMPLEMENTATION
+#undef SUBPROCCES_IMPLEMENTATION
+
 #include <string.h>
 #include <errno.h>
 
