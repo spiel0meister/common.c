@@ -45,6 +45,8 @@ void dah__remove_ordered(void* da, size_t i, size_t item_size);
 void* dah__free(void* da);
 
 #ifdef DAH_IMPLEMENTATION
+#undef DAH_IMPLEMENTATION
+
 #include <string.h>
 
 DaHeader* dah__default_header(size_t item_size) {

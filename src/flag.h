@@ -50,6 +50,8 @@ int flag_parse(int argc, char** argv);
 #endif // FLAG_H_
 
 #ifdef FLAG_IMPLEMENTATION
+#undef FLAG_IMPLEMENTATION
+
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>

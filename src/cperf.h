@@ -17,6 +17,7 @@ long clock_nsecs(clock_t start);
 #endif // PERF_H_
 
 #ifdef CPERF_IMPLEMENTATION
+#undef CPERF_IMPLEMENTATION
 
 double clock_secs(clock_t start) {
     return (double)(clock() - start) / CLOCKS_PER_SEC;

@@ -15,6 +15,8 @@ void lcprint_leaks(FILE* sink);
 #endif // LEAKCHECK_H_
 
 #ifdef LC_IMPLEMENTATION
+#undef LC_IMPLEMENTATION
+
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
