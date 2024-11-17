@@ -119,6 +119,18 @@ char* arena_strdup(Arena* self, const char* cstr) {
     return memcpy(copy, cstr, len);
 }
 
+char* arena_realpath(Arena* self, const char* path) {
+    char* real = realpath(path, NULL);
+    if (real == NULL) {
+        fprintf(stderr, "Couldn't get real path '%s': %s\n", path, strerror(errno));
+        return NULL;
+    }
+
+    char* out = arena_strdup(self, real);
+    free(real);
+    return out;
+}
+
 void arena_reset(Arena* self) {
     for (ArenaRegion* r = self->start; r != NULL; r = r->next) {
         r->count = 0;
