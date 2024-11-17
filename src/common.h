@@ -11,7 +11,9 @@
 #define EASINGS_IMPLEMENTATION
 #define FLAG_IMPLEMENTATION
 #define FS_IMPLEMENTATION
+#ifdef COMMON_INCLUDE_LC
 #define LC_IMPLEMENTATION
+#endif // COMMON_INCLUDE_LC
 #define LINEAR_IMPLEMENTATION
 #define LOG_IMPLEMENTATION
 #ifdef COMMON_USE_MSTR
@@ -32,7 +34,6 @@
 #include "./easings.h"
 #include "./flag.h"
 #include "./fs.h"
-#include "./leakcheck.h"
 #include "./linear.h"
 #include "./log.h"
 #include "./mstr.h"
@@ -42,5 +43,9 @@
 #include "./tsprintf.h"
 #include "./types.h"
 #include "./utils.h"
+
+#ifdef COMMON_INCLUDE_LC
+#include "./leakcheck.h"
+#endif // COMMON_INCLUDE_LC
 
 #endif // COMMON_H_

@@ -40,6 +40,7 @@ void* arena_realloc(Arena* self, size_t oldsize, size_t newsize, void* ptr);
 #define arena_memdup(arena, ptr, size) memcpy(arena_alloc(arena, size), ptr, size)
 char* arena_sprintf(Arena* self, const char* fmt, ...);
 char* arena_strdup(Arena* self, const char* cstr);
+char* arena_realpath(Arena* self, const char* path);
 
 ArenaMark arena_mark(Arena* self);
 void arena_jumpback(Arena* self, ArenaMark mark);
