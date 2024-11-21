@@ -53,6 +53,7 @@ void arena_free(Arena* self);
 #undef ARENA_IMPLEMENTATION
 
 #include <stdarg.h>
+#include <errno.h>
 #include <string.h>
 #include <assert.h>
 
