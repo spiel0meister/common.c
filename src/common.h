@@ -8,7 +8,9 @@
 #ifndef COMMON_USE_DA
 #define DAH_IMPLEMENTATION
 #endif // COMMON_USE_DA
+#ifdef COMMON_USE_EASINGS
 #define EASINGS_IMPLEMENTATION
+#endif COMMON_USE_EASINGS
 #define FLAG_IMPLEMENTATION
 #define FS_IMPLEMENTATION
 #ifdef COMMON_INCLUDE_LC
@@ -31,7 +33,6 @@
 #include "./cperf.h"
 #include "./da.h"
 #include "./dah.h"
-#include "./easings.h"
 #include "./flag.h"
 #include "./fs.h"
 #include "./linear.h"
@@ -43,6 +44,10 @@
 #include "./tsprintf.h"
 #include "./types.h"
 #include "./utils.h"
+
+#ifdef COMMON_USE_EASINGS
+#include "./easings.h"
+#endif // COMMON_USE_EASINGS
 
 #ifdef COMMON_INCLUDE_LC
 #include "./leakcheck.h"
