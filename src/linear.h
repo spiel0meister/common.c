@@ -4,6 +4,10 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+#ifndef LINEAR_DEFAULT_CAPACITY
+#define LINEAR_DEFAULT_CAPACITY (1 << 20)
+#endif // LINEAR_DEFAULT_CAPACITY
+
 #ifndef LINEAR_ASSERT
 #include <assert.h>
 #define LINEAR_ASSERT(expr) assert(expr)
@@ -101,7 +105,7 @@ void linear_rewind(Linear* self, size_t offset) {
 }
 
 void* linear_allocb(Linear* self, size_t size) {
-    assert(self->mem != NULL && "Linear in not prealloced");
+    if (self->mem == NULL) linear_prealloc(self, LINEAR_DEFAULT_CAPACITY);
 
     size_t word_size = sizeof(uintptr_t);
     size_t real_size = (size + word_size - 1)/word_size;
