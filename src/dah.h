@@ -32,12 +32,11 @@ typedef struct {
 #define dah_reset(da) (da_getheader(da)->count = 0)
 #define dah_free(da) ((da) = dah__free(da))
 
-#define dah_getlen(da) (dah_getheader(da)->count)
-
 #define dah_for(da, counter) for (size_t counter = 0; counter < dah_getheader(da)->count; ++counter)
 #define dah_foreach(da, Type, ptr) for (Type* ptr = da; ptr < da + dah_getheader(da)->count; ++ptr)
 
 DaHeader* dah_getheader(void* da);
+size_t dah_getlen(void* da);
 
 DaHeader* dah__default_header(size_t item_size);
 void* dah__maybe_resize(void* da, size_t to_add, size_t item_size);
@@ -70,6 +69,11 @@ void* dah__maybe_resize(void* da, size_t to_add, size_t item_size) {
     }
 
     return header->data;
+}
+
+size_t dah_getlen(void* da) {
+    if (da == NULL) return 0;
+    return dah_getheader(da)->count;
 }
 
 DaHeader* dah_getheader(void* da) {
