@@ -827,111 +827,6 @@ defer:
 }
 
 #endif // FS_IMPLEMENTATION
-#ifndef LEAKCHECK_H_
-#define LEAKCHECK_H_
-#include <stdio.h>
-
-#ifndef LC_ALLOCS_CAP
-#define LC_ALLOCS_CAP 1024
-#endif // LC_ALLOCS_CAP
-
-void lcfree(void* ptr);
-void* lcmalloc_(size_t size, const char* file, size_t line);
-void* lccalloc_(size_t size, size_t count, const char* file, size_t line);
-void* lcrealloc_(void* ptr, size_t new_size, const char* file, size_t line);
-void lcprint_leaks(FILE* sink);
-
-#endif // LEAKCHECK_H_
-
-#ifdef LC_IMPLEMENTATION
-#undef LC_IMPLEMENTATION
-
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-
-typedef struct {
-    const char* file;
-    size_t line;
-    size_t size;
-    char data[];
-}LeakcheckInfo;
-
-static LeakcheckInfo* lc_infos[LC_ALLOCS_CAP] = {0};
-static size_t lc_infos_count = 0;
-
-void lcprint_leaks(FILE* sink) {
-    for (size_t i = 0; i < lc_infos_count; ++i) {
-        LeakcheckInfo* info = lc_infos[i];
-        fprintf(sink, "Leaked memory at %s:%ld of size %ld (%ld with metadata)\n", info->file, info->line, info->size, info->size + sizeof(*info));
-    }
-}
-
-void lc_append(LeakcheckInfo* info) {
-    assert(lc_infos_count < LC_ALLOCS_CAP);
-    lc_infos[lc_infos_count++] = info;
-}
-
-void lc_remove(LeakcheckInfo* info) {
-    assert(lc_infos_count > 0);
-    for (size_t i = 0; i < lc_infos_count; ++i) {
-        if (lc_infos[i] == info) {
-            lc_infos[i] = lc_infos[lc_infos_count - 1];
-            lc_infos_count -= 1;
-            break;
-        }
-    }
-}
-
-void* lcmalloc_(size_t size, const char* file, size_t line) {
-    LeakcheckInfo* info = malloc(sizeof(LeakcheckInfo) + size);
-    info->file = file;
-    info->line = line;
-    info->size = size;
-    lc_append(info);
-    return info->data;
-}
-
-void* lccalloc_(size_t count, size_t size, const char* file, size_t line) {
-    LeakcheckInfo* info = malloc(sizeof(LeakcheckInfo) + count * size);
-    info->file = file;
-    info->line = line;
-    info->size = count * size;
-    lc_append(info);
-    return memset(info->data, 0, info->size);
-}
-
-void* lcrealloc_(void* ptr, size_t new_size, const char* file, size_t line) {
-    lc_remove((LeakcheckInfo*)ptr - 1);
-    LeakcheckInfo* info = realloc((LeakcheckInfo*)ptr - 1, new_size + sizeof(LeakcheckInfo));
-    info->line = line;
-    info->file = file;
-    info->size = new_size;
-    lc_append(info);
-    return info->data;
-}
-
-void lcfree(void* ptr) {
-    if (ptr != NULL) {
-        LeakcheckInfo* info = ((LeakcheckInfo*)ptr - 1);
-        lc_remove(info);
-        free(info);
-    }
-}
-
-#endif // LEAKCHECK_IMPLEMENTATION
-
-#ifndef LC_NO_SHADOW_STDLIB_FUNCS
-#define malloc(size) lcmalloc_(size, __FILE__, __LINE__)
-#define calloc(count, size) lccalloc_(count, size, __FILE__, __LINE__)
-#define realloc(ptr, new_size) lcrealloc_(ptr, new_size, __FILE__, __LINE__)
-#define free lcfree
-#else
-#define lcmalloc(...) lcmalloc_(__VA_ARGS__, __FILE__, __LINE__)
-#define lccalloc(count, size) lccalloc_(count, size, __FILE__, __LINE__)
-#define lcrealloc(ptr, new_size) lcrealloc_(ptr, new_size, __FILE__, __LINE__)
-#endif // LC_ALIAS_FUNCS
-
 #ifndef LINEAR_H_
 #define LINEAR_H_
 #include <stdint.h>
@@ -1728,6 +1623,8 @@ StringSplit sv_split_pred(StringView sv, sv_predicate_t pred);
 
 bool sv_cmpc(StringView sv, const char* cstr);
 bool sv_cmpsv(StringView sv, StringView that);
+bool sv_ends_with(StringView self, StringView suffix);
+bool sv_starts_with(StringView self, StringView prefix);
 
 char* sv_to_cstr(StringView sv);
 char* sv_to_cstr_inplace(StringView sv, char buf[sv.len + 1]);
@@ -1954,6 +1851,22 @@ bool sv_cmpsv(StringView sv, StringView that) {
     return true;
 }
 
+bool sv_cmpsv(StringView sv, StringView that) {
+    if (sv.len != that.len) return false;
+
+    for (size_t i = 0; i < sv.len; ++i) {
+        if (sv.start[i] != that.start[i]) return false;
+    }
+
+    return true;
+}
+
+bool sv_ends_with(StringView self, StringView suffix) {
+    if (self.len < suffix.len) return false;
+
+    return strncmp(self.start + self.len - suffix.len, suffix.start, suffix.len) == 0;
+}
+
 char* sv_to_cstr(StringView sv) {
     char* buf = SV_MALLOC(sv.len + 1);
     memcpy(buf, sv.start, sv.len);
@@ -1969,246 +1882,6 @@ char* sv_to_cstr_inplace(StringView sv, char buf[sv.len + 1]) {
 
 
 #endif // STRING_VIEW_IMPLEMENTATION
-#ifndef SUBPROCCES_H_
-#define SUBPROCCES_H_
-
-#include <stddef.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <sys/types.h>
-
-typedef struct {
-    pid_t pid;
-    int pipe_in[2];
-    int pipe_out[2];
-}Proc;
-
-#define PIPE_READ 0
-#define PIPE_WRITE 1
-
-pid_t start_proccesvl(char* file, size_t args_count, va_list args);
-pid_t start_proccesv(char* file, ...);
-pid_t start_procces(char* file, char** args, size_t args_count);
-bool wait_for_process(pid_t pid);
-
-Proc start_procces_ex(char* file, char** args, size_t args_count);
-Proc start_procces_exvl(char* file, size_t args_count, va_list args);
-Proc start_procces_exv(char* file, ...);
-
-#endif // SUBPROCCES_H_
-
-#ifdef SUBPROCCES_IMPLEMENTATION
-#undef SUBPROCCES_IMPLEMENTATION
-
-#include <string.h>
-#include <errno.h>
-
-#include <unistd.h>
-#include <sys/wait.h>
-
-char* strsignal(int sig);
-
-pid_t start_proccesvl(char* file, size_t args_count, va_list args) {
-    char* argv[args_count + 2];
-    argv[0] = file;
-
-    for (size_t i = 0; i < args_count; ++i) {
-        argv[i + 1] = va_arg(args, char*);
-    }
-
-    argv[args_count + 1] = NULL;
-
-    pid_t pid = fork();
-
-    if (pid < 0) {
-        fprintf(stderr, "Couldn't fork: %s\n", strerror(errno));
-        return -1;
-    } else if (pid == 0) {
-        execvp(file, argv);
-
-        fprintf(stderr, "Couldn't exec %s: %s\n", file, strerror(errno));
-        _exit(1);
-    }
-
-    return pid;
-}
-
-pid_t start_proccesv(char* file, ...) {
-    va_list args;
-    va_start(args, file);
-
-    size_t count = 0;
-
-    char* arg = va_arg(args, char*);
-    while (arg != NULL) {
-        ++count;
-        arg = va_arg(args, char*);
-    }
-
-    va_end(args);
-    va_start(args, file);
-
-    pid_t pid = start_proccesvl(file, count, args);
-
-    va_end(args);
-    return pid;
-}
-
-pid_t start_procces(char* file, char** args, size_t args_count) {
-    char* argv[args_count + 2];
-    argv[0] = file;
-
-    for (size_t i = 0; i < args_count; ++i) {
-        argv[i] = args[i];
-    }
-
-    argv[args_count + 1] = NULL;
-
-    pid_t pid = fork();
-
-    if (pid < 0) {
-        fprintf(stderr, "Couldn't fork: %s\n", strerror(errno));
-        return -1;
-    } else if (pid == 0) {
-        execvp(file, argv);
-
-        fprintf(stderr, "Couldn't exec %s: %s\n", file, strerror(errno));
-        _exit(1);
-    }
-
-    return pid;
-}
-
-Proc start_procces_ex(char* file, char** args, size_t args_count) {
-    char* argv[args_count + 2];
-    argv[0] = file;
-
-    for (size_t i = 0; i < args_count; ++i) {
-        argv[i] = args[i];
-    }
-
-    argv[args_count + 1] = NULL;
-
-    Proc proc = {0};
-
-    if (pipe(proc.pipe_in) < 0) {
-        fprintf(stderr, "Couldn't create pipe: %s\n", strerror(errno));
-        return proc;
-    }
-
-    if (pipe(proc.pipe_out) < 0) {
-        fprintf(stderr, "Couldn't create pipe: %s\n", strerror(errno));
-        return proc;
-    }
-
-    proc.pid = fork();
-    if (proc.pid < 0) {
-        fprintf(stderr, "Couldn't fork: %s\n", strerror(errno));
-        return proc;
-    } else if (proc.pid == 0) {
-        dup2(proc.pipe_in[PIPE_READ], 0);
-        dup2(proc.pipe_out[PIPE_WRITE], 1);
-        dup2(proc.pipe_out[PIPE_WRITE], 2);
-
-        execvp(file, argv);
-
-        fprintf(stderr, "Couldn't exec %s: %s\n", file, strerror(errno));
-        _exit(1);
-    }
-
-    return proc;
-}
-
-Proc start_procces_exvl(char* file, size_t args_count, va_list args) {
-    char* argv[args_count + 2];
-    argv[0] = file;
-
-    for (size_t i = 0; i < args_count; ++i) {
-        argv[i + 1] = va_arg(args, char*);
-    }
-
-    argv[args_count + 1] = NULL;
-
-    Proc proc = {0};
-
-    if (pipe(proc.pipe_in) < 0) {
-        fprintf(stderr, "Couldn't create pipe: %s\n", strerror(errno));
-        return proc;
-    }
-
-    if (pipe(proc.pipe_out) < 0) {
-        fprintf(stderr, "Couldn't create pipe: %s\n", strerror(errno));
-        return proc;
-    }
-
-    proc.pid = fork();
-    if (proc.pid < 0) {
-        fprintf(stderr, "Couldn't fork: %s\n", strerror(errno));
-        return proc;
-    } else if (proc.pid == 0) {
-        dup2(proc.pipe_in[PIPE_READ], 0);
-        dup2(proc.pipe_out[PIPE_WRITE], 1);
-        dup2(proc.pipe_out[PIPE_WRITE], 2);
-
-        execvp(file, argv);
-
-        fprintf(stderr, "Couldn't exec %s: %s\n", file, strerror(errno));
-        _exit(1);
-    }
-
-    return proc;
-}
-
-Proc start_procces_exv(char* file, ...) {
-    va_list args;
-    va_start(args, file);
-
-    size_t count = 0;
-
-    char* arg = va_arg(args, char*);
-    while (arg != NULL) {
-        ++count;
-        arg = va_arg(args, char*);
-    }
-
-    va_end(args);
-    va_start(args, file);
-
-    Proc proc = start_procces_exvl(file, count, args);
-
-    va_end(args);
-    return proc;
-}
-
-
-bool wait_for_process(pid_t pid) {
-    for (;;) {
-        int wstatus;
-        if (waitpid(pid, &wstatus, 0) < 0) {
-            fprintf(stderr, "Couldn't wait for process: %s\n", strerror(errno));
-            return false;
-        }
-
-        if (WIFEXITED(wstatus)) {
-            int estatus = WEXITSTATUS(wstatus);
-            if (estatus) {
-                fprintf(stderr, "Process exited with status %d\n", estatus);
-                return false;
-            }
-
-            break;
-        }
-
-        if (WIFSIGNALED(wstatus)) {
-            fprintf(stderr, "Process was terminated by signal %d (%s)\n", WTERMSIG(wstatus), strsignal(WTERMSIG(wstatus)));
-            return false;
-        }
-    }
-
-    return true;
-}
-
-#endif // SUBPROCCES_IMPLEMENTATION
 #ifndef TSPRINTF_H_
 #define TSPRINTF_H_
 #include <stddef.h>
@@ -2367,3 +2040,108 @@ bool dynsym_load(void** sym, void* handle, const char* name) {
 }
 
 #endif // UTILS_IMPLEMENTATION
+#ifndef LEAKCHECK_H_
+#define LEAKCHECK_H_
+#include <stdio.h>
+
+#ifndef LC_ALLOCS_CAP
+#define LC_ALLOCS_CAP 1024
+#endif // LC_ALLOCS_CAP
+
+void lcfree(void* ptr);
+void* lcmalloc_(size_t size, const char* file, size_t line);
+void* lccalloc_(size_t size, size_t count, const char* file, size_t line);
+void* lcrealloc_(void* ptr, size_t new_size, const char* file, size_t line);
+void lcprint_leaks(FILE* sink);
+
+#endif // LEAKCHECK_H_
+
+#ifdef LC_IMPLEMENTATION
+#undef LC_IMPLEMENTATION
+
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+typedef struct {
+    const char* file;
+    size_t line;
+    size_t size;
+    char data[];
+}LeakcheckInfo;
+
+static LeakcheckInfo* lc_infos[LC_ALLOCS_CAP] = {0};
+static size_t lc_infos_count = 0;
+
+void lcprint_leaks(FILE* sink) {
+    for (size_t i = 0; i < lc_infos_count; ++i) {
+        LeakcheckInfo* info = lc_infos[i];
+        fprintf(sink, "Leaked memory at %s:%ld of size %ld (%ld with metadata)\n", info->file, info->line, info->size, info->size + sizeof(*info));
+    }
+}
+
+void lc_append(LeakcheckInfo* info) {
+    assert(lc_infos_count < LC_ALLOCS_CAP);
+    lc_infos[lc_infos_count++] = info;
+}
+
+void lc_remove(LeakcheckInfo* info) {
+    assert(lc_infos_count > 0);
+    for (size_t i = 0; i < lc_infos_count; ++i) {
+        if (lc_infos[i] == info) {
+            lc_infos[i] = lc_infos[lc_infos_count - 1];
+            lc_infos_count -= 1;
+            break;
+        }
+    }
+}
+
+void* lcmalloc_(size_t size, const char* file, size_t line) {
+    LeakcheckInfo* info = malloc(sizeof(LeakcheckInfo) + size);
+    info->file = file;
+    info->line = line;
+    info->size = size;
+    lc_append(info);
+    return info->data;
+}
+
+void* lccalloc_(size_t count, size_t size, const char* file, size_t line) {
+    LeakcheckInfo* info = malloc(sizeof(LeakcheckInfo) + count * size);
+    info->file = file;
+    info->line = line;
+    info->size = count * size;
+    lc_append(info);
+    return memset(info->data, 0, info->size);
+}
+
+void* lcrealloc_(void* ptr, size_t new_size, const char* file, size_t line) {
+    lc_remove((LeakcheckInfo*)ptr - 1);
+    LeakcheckInfo* info = realloc((LeakcheckInfo*)ptr - 1, new_size + sizeof(LeakcheckInfo));
+    info->line = line;
+    info->file = file;
+    info->size = new_size;
+    lc_append(info);
+    return info->data;
+}
+
+void lcfree(void* ptr) {
+    if (ptr != NULL) {
+        LeakcheckInfo* info = ((LeakcheckInfo*)ptr - 1);
+        lc_remove(info);
+        free(info);
+    }
+}
+
+#endif // LEAKCHECK_IMPLEMENTATION
+
+#ifndef LC_NO_SHADOW_STDLIB_FUNCS
+#define malloc(size) lcmalloc_(size, __FILE__, __LINE__)
+#define calloc(count, size) lccalloc_(count, size, __FILE__, __LINE__)
+#define realloc(ptr, new_size) lcrealloc_(ptr, new_size, __FILE__, __LINE__)
+#define free lcfree
+#else
+#define lcmalloc(...) lcmalloc_(__VA_ARGS__, __FILE__, __LINE__)
+#define lccalloc(count, size) lccalloc_(count, size, __FILE__, __LINE__)
+#define lcrealloc(ptr, new_size) lcrealloc_(ptr, new_size, __FILE__, __LINE__)
+#endif // LC_ALIAS_FUNCS
+
