@@ -52,6 +52,8 @@ StringSplit sv_split_pred(StringView sv, sv_predicate_t pred);
 
 bool sv_cmpc(StringView sv, const char* cstr);
 bool sv_cmpsv(StringView sv, StringView that);
+bool sv_ends_with(StringView self, StringView suffix);
+bool sv_starts_with(StringView self, StringView prefix);
 
 char* sv_to_cstr(StringView sv);
 char* sv_to_cstr_inplace(StringView sv, char buf[sv.len + 1]);
@@ -276,6 +278,22 @@ bool sv_cmpsv(StringView sv, StringView that) {
     }
 
     return true;
+}
+
+bool sv_cmpsv(StringView sv, StringView that) {
+    if (sv.len != that.len) return false;
+
+    for (size_t i = 0; i < sv.len; ++i) {
+        if (sv.start[i] != that.start[i]) return false;
+    }
+
+    return true;
+}
+
+bool sv_ends_with(StringView self, StringView suffix) {
+    if (self.len < suffix.len) return false;
+
+    return strncmp(self.start + self.len - suffix.len, suffix.start, suffix.len) == 0;
 }
 
 char* sv_to_cstr(StringView sv) {
